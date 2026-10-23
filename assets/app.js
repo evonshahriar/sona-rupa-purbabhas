@@ -133,7 +133,7 @@
     };
   }
 
-  const zoneName = (z) => z.kind === "fvg" ? "পূরণ না হওয়া ফাঁক (FVG)" : z.direction > 0 ? "চাহিদা অঞ্চল (অর্ডার ব্লক)" : "সরবরাহ অঞ্চল (অর্ডার ব্লক)";
+  const zoneName = (z) => z.kind === "fvg" ? "ফাঁকা জায়গা" : z.direction > 0 ? "আগের বড় কেনার জায়গা" : "আগের বড় বিক্রির জায়গা";
 
   // History pill: 2003-2023 base rate of the pattern next to its control.
   function hist(key, mode = "race") {
@@ -143,10 +143,10 @@
     if (mode === "race") {
       // Highlight only when both the 2003-2018 and the 2019-2023 halves sit at least 3 points from a coin flip, same side.
       const edge = Math.min(Math.abs(r.dev - 0.5), Math.abs(r.val - 0.5)) >= 0.03 && Math.sign(r.dev - 0.5) === Math.sign(r.val - 0.5);
-      return `<span class="hist${edge ? " edge" : ""}" title="২০০৩–২০২৩, ${fmtInt.format(r.n)}টি ঘটনা">ইতিহাসে ${pct(r.rate, 0)} · কয়েন টস ৫০%</span>`;
+      return `<span class="hist${edge ? " edge" : ""}" title="২০০৩–২০২৩, ${fmtInt.format(r.n)}টি ঘটনা">অতীতে মিলেছে ${pct(r.rate, 0)} · টসে ৫০%</span>`;
     }
     const c = reality(m)[`${key}_control`];
-    return `<span class="hist" title="২০০৩–২০২৩, ${fmtInt.format(r.n)}টি ঘটনা">ছুঁয়েছে ${pct(r.rate, 0)} · উল্টো দিকে ${pct(c.rate, 0)}</span>`;
+    return `<span class="hist" title="২০০৩–২০২৩, ${fmtInt.format(r.n)}টি ঘটনা">অতীতে ছুঁয়েছে ${pct(r.rate, 0)} · অন্য দিকে ${pct(c.rate, 0)}</span>`;
   }
 
   // ---------------------------------------------------------------- chart
@@ -197,7 +197,7 @@
     if (state.layers.structure && m.read) {
       const markers = L(m).swings.map((s) => ({
         time: s.time, position: s.kind === "high" ? "aboveBar" : "belowBar", shape: "circle", size: 0.4,
-        color: (s.label === "HH" || s.label === "HL") ? css("--up") : css("--down"), text: s.label,
+        color: (s.label === "HH" || s.label === "HL") ? css("--up") : css("--down"), text: (s.label === "HH" || s.label === "HL") ? "উঁচু" : "নিচু",
       })).sort((a, b) => a.time - b.time);
       candles.setMarkers(markers);
     }
@@ -263,10 +263,10 @@
     const add = (price, color, title, style = 0) => state.planLines.push(state.candles.createPriceLine({
       price, color, lineWidth: 2, lineStyle: style, axisLabelVisible: true, title,
     }));
-    add(p.entry, css("--ink"), p.mode === "pullback" ? "লিমিট এন্ট্রি" : "এন্ট্রি", 2);
+    add(p.entry, css("--ink"), "ঢোকা", 2);
     add(p.sl, css("--down"), "স্টপ লস");
-    add(p.tp1.price, css("--up"), "TP1");
-    if (p.tp2) add(p.tp2.price, css("--up"), "TP2");
+    add(p.tp1.price, css("--up"), "লাভ ১");
+    if (p.tp2) add(p.tp2.price, css("--up"), "লাভ ২");
   }
 
   // ---------------------------------------------------------------- overlay (zones, liquidity, breaks, plan boxes)
@@ -318,7 +318,7 @@
         const rgb = zone.kind === "fvg" ? css("--fvg-rgb") : zone.direction > 0 ? css("--up-rgb") : css("--down-rgb");
         ctx.fillStyle = `rgba(${rgb}, ${zone.kind === "fvg" ? 0.16 : 0.14})`;
         ctx.fillRect(x1, Math.min(y1, y2), plotW - x1, Math.max(2, Math.abs(y2 - y1)));
-        label(zone.kind === "fvg" ? "FVG" : zone.direction > 0 ? "চাহিদা" : "সরবরাহ", x1 + 4, Math.min(y1, y2) + 12, `rgba(${rgb}, 1)`);
+        label(zone.kind === "fvg" ? "ফাঁক" : zone.direction > 0 ? "কেনার জায়গা" : "বেচার জায়গা", x1 + 4, Math.min(y1, y2) + 12, `rgba(${rgb}, 1)`);
       }
       const r = L(m).range;
       if (r) {
@@ -326,7 +326,7 @@
         if (y !== null) {
           ctx.strokeStyle = `rgba(${css("--ink-rgb")}, 0.35)`; ctx.setLineDash([2, 4]); ctx.lineWidth = 1;
           ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(plotW, y); ctx.stroke(); ctx.setLineDash([]);
-          label("৫০% · উপরে প্রিমিয়াম, নিচে ডিসকাউন্ট", 6, y - 4, `rgba(${css("--ink-rgb")}, 0.55)`);
+          label("মাঝখান · ওপরে দামি, নিচে সস্তা", 6, y - 4, `rgba(${css("--ink-rgb")}, 0.55)`);
         }
       }
     }
@@ -347,7 +347,7 @@
         if (y === null) continue;
         ctx.strokeStyle = `rgba(${rgb}, 0.35)`; ctx.lineWidth = 1; ctx.setLineDash([2, 3]);
         ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(plotW, y); ctx.stroke(); ctx.setLineDash([]);
-        label(`${p.names[0]} · সুইপ হয়েছে`, plotW - 6, y + 13, `rgba(${rgb}, 0.75)`, "right");
+        label(`${p.names[0]} · স্টপ কাটা হয়েছে`, plotW - 6, y + 13, `rgba(${rgb}, 0.75)`, "right");
       }
     }
 
@@ -358,7 +358,7 @@
         const color = b.direction > 0 ? css("--up") : css("--down");
         ctx.strokeStyle = color; ctx.lineWidth = 1; ctx.setLineDash(b.kind === "CHoCH" ? [4, 3] : []);
         ctx.beginPath(); ctx.moveTo(x1, y); ctx.lineTo(x2, y); ctx.stroke(); ctx.setLineDash([]);
-        label(b.kind, (x1 + x2) / 2, b.direction > 0 ? y - 4 : y + 12, color, "center");
+        label(b.kind === "BOS" ? "ভাঙন" : "মোড়", (x1 + x2) / 2, b.direction > 0 ? y - 4 : y + 12, color, "center");
       }
     }
 
@@ -376,8 +376,8 @@
           ctx.fillStyle = `rgba(${css("--up-rgb")}, 0.12)`;
           ctx.fillRect(x0, Math.min(ye, yt1), plotW - x0, Math.abs(yt1 - ye));
         }
-        label(`ঝুঁকি ${usd(p.riskUsd)}`, x0 + 6, (ye + ys) / 2 + 4, css("--down"));
-        label(`লাভ ${usd(p.tp1.profit)}${p.tp2 ? " / " + usd(p.tp2.profit) : ""}`, x0 + 6, (ye + yt) / 2 + 4, css("--up"));
+        label(`হারালে ${usd(p.riskUsd)}`, x0 + 6, (ye + ys) / 2 + 4, css("--down"));
+        label(`জিতলে ${usd(p.tp1.profit)}${p.tp2 ? " / " + usd(p.tp2.profit) : ""}`, x0 + 6, (ye + yt) / 2 + 4, css("--up"));
       }
     }
     ctx.restore();
@@ -388,55 +388,59 @@
     const m = metalData();
     if (!m || !m.read) return;
     const r = m.read, metal = state.metal, price = currentPrice();
-    const tf = [["1d", "দৈনিক"], ["4h", "৪ ঘণ্টা"], ["1h", "১ ঘণ্টা"]];
+    const tf = [["1d", "দিনের চার্ট"], ["4h", "৪ ঘণ্টার চার্ট"], ["1h", "১ ঘণ্টার চার্ট"]];
     $("mtf").innerHTML = tf.map(([k, name]) => `<span class="trend ${r.trend[k].key}">${name} <b>${esc(r.trend[k].bn)}</b></span>`).join("");
     const items = [];
     const keys = tf.map(([k]) => r.trend[k].key);
-    if (keys.every((k) => k === "up")) items.push(["up", "তিনটি টাইমফ্রেমেই কাঠামো ঊর্ধ্বমুখী: উঁচু চূড়া ও উঁচু তল তৈরি হচ্ছে, ক্রেতারা নিয়ন্ত্রণে।", hist("race_trend_aligned")]);
-    else if (keys.every((k) => k === "down")) items.push(["down", "তিনটি টাইমফ্রেমেই কাঠামো নিম্নমুখী: নিচু চূড়া ও নিচু তল তৈরি হচ্ছে, বিক্রেতারা নিয়ন্ত্রণে।", hist("race_trend_aligned")]);
-    else items.push(["", `টাইমফ্রেমগুলো একমত নয় (দৈনিক ${r.trend["1d"].bn}, ৪ ঘণ্টা ${r.trend["4h"].bn}, ১ ঘণ্টা ${r.trend["1h"].bn})। এমন সময়ে দাম প্রায়ই দুই দিকেই ঝাঁকুনি দেয়।`, ""]);
+    if (keys.every((k) => k === "up")) items.push(["up", "দাম এখন ওঠার পথে: দিনের, ৪ ঘণ্টার আর ১ ঘণ্টার, তিন চার্টেই। ক্রেতারা এগিয়ে।", hist("race_trend_aligned")]);
+    else if (keys.every((k) => k === "down")) items.push(["down", "দাম এখন নামার পথে: দিনের, ৪ ঘণ্টার আর ১ ঘণ্টার, তিন চার্টেই। বিক্রেতারা এগিয়ে।", hist("race_trend_aligned")]);
+    else items.push(["", `চার্টগুলো এক দিকে নেই (দিনে ${r.trend["1d"].bn}, ৪ ঘণ্টায় ${r.trend["4h"].bn}, ১ ঘণ্টায় ${r.trend["1h"].bn})। এমন সময় দাম এদিক-ওদিক দোলে।`, ""]);
 
     const lb = r.trend[state.tf].last_break;
     if (lb) {
       const up = lb.direction > 0;
-      const what = lb.kind === "BOS" ? "কাঠামো ভেঙেছে (BOS): চলমান প্রবণতা আরও এগিয়েছে" : "চরিত্র বদল (CHoCH): আগের প্রবণতার বিপরীতে প্রথম ভাঙন";
-      items.push([up ? "up" : "down", `${TF[state.tf].of} চার্টে ${esc(fmtDateTime.format(new Date(lb.time * 1000)))}-এর ক্যান্ডেল <b>${money(lb.level, metal)}</b> এর ${up ? "উপরে" : "নিচে"} বন্ধ হয়ে ${what}।`,
+      const what = lb.kind === "BOS"
+        ? `আগের ${up ? "চূড়া" : "তল"} ভেঙে গেছে, দাম যে দিকে যাচ্ছিল সেদিকেই চলছে`
+        : `এতদিন দাম ${up ? "নামছিল" : "উঠছিল"}, এই প্রথম উল্টো দিকে ভাঙল, দিক বদলাতে পারে`;
+      items.push([up ? "up" : "down", `${TF[state.tf].of} চার্টে ${esc(fmtDateTime.format(new Date(lb.time * 1000)))}-এ দাম <b>${money(lb.level, metal)}</b> এর ${up ? "ওপরে" : "নিচে"} বন্ধ হয়েছে: ${what}।`,
         hist(lb.kind === "BOS" ? "race_bos" : "race_choch")]);
     }
     const rg = L(m).range;
     if (rg) {
       const pos = (price - rg.low) / (rg.high - rg.low);
-      const where = pos > 1 ? "পরিসরের উপরে বেরিয়ে গেছে" : pos < 0 ? "পরিসরের নিচে বেরিয়ে গেছে"
-        : pos >= 0.5 ? "উপরের অর্ধেকে, অর্থাৎ প্রিমিয়ামে (কেনার জন্য দামি, বেচার জন্য ভালো জায়গা)" : "নিচের অর্ধেকে, অর্থাৎ ডিসকাউন্টে (কেনার জন্য সস্তা, বেচার জন্য খারাপ জায়গা)";
-      items.push(["gold", `দাম ${TF[state.tf].of} সাম্প্রতিক পরিসরের (<b>${money(rg.low, metal)}</b> – <b>${money(rg.high, metal)}</b>) ${where}।`, hist("race_discount_premium")]);
+      const where = pos > 1 ? "সীমা ছাড়িয়ে ওপরে চলে গেছে" : pos < 0 ? "সীমা ছাড়িয়ে নিচে চলে গেছে"
+        : pos >= 0.5 ? "ওপরের দিকে আছে: কেনার জন্য দামি, বেচার জন্য ভালো জায়গা" : "নিচের দিকে আছে: কেনার জন্য সস্তা, বেচার জন্য খারাপ জায়গা";
+      items.push(["gold", `সাম্প্রতিক ওঠানামা <b>${money(rg.low, metal)}</b> থেকে <b>${money(rg.high, metal)}</b>। দাম এখন এর ${where}।`, hist("race_discount_premium")]);
     }
     const near = nearestPools(m, price, 1);
     const poolKey = (p) => p.kind === "equal" ? "magnet_equal_levels" : p.kind === "pdh" ? "magnet_pdh" : p.kind === "pdl" ? "magnet_pdl" : null;
     for (const [p, dir] of [[near.above[0], "উপরে"], [near.below[0], "নিচে"]]) {
       if (!p) continue;
-      const who = p.side === "above" ? "বিক্রেতাদের স্টপ ও ব্রেকআউট ক্রেতাদের অর্ডার" : "ক্রেতাদের স্টপ ও ব্রেকডাউন বিক্রেতাদের অর্ডার";
       const k = poolKey(p);
-      items.push(["liq", `${dir} <b>${money(p.price, metal)}</b>: ${esc(p.names.join(" ও "))}। এর ওপারে ${who} জমে থাকে, বড় খেলোয়াড়রা প্রায়ই এমন জায়গা ছুঁয়ে যায়।`, k ? hist(k, "magnet") : ""]);
+      items.push(["liq", `${dir} <b>${money(p.price, metal)}</b> (${esc(p.names.join(" ও "))})। এর ঠিক ${p.side === "above" ? "ওপরে" : "নিচে"} অনেকের স্টপ লস থাকে, তাই দাম প্রায়ই এমন জায়গা ছুঁয়ে আসে।`, k ? hist(k, "magnet") : ""]);
     }
     const swept = pools(m, true).filter((p) => p.swept);
     for (const p of swept.slice(0, 1)) {
-      items.push(["warn", `দাম ইতিমধ্যে ${esc(p.names.join(" ও "))} (<b>${money(p.price, metal)}</b>) পেরিয়ে সেখানকার স্টপ তুলে নিয়েছে। এখন দেখার বিষয় দাম ফিরে আসে (স্টপ হান্ট) নাকি এগিয়ে যায় (ব্রেকআউট)।`, hist("race_sweep_reversal")]);
+      const up = p.side === "above";
+      items.push(["warn", `দাম ${esc(p.names.join(" ও "))} (<b>${money(p.price, metal)}</b>) পার হয়ে ${up ? "ওপরে" : "নিচে"} গিয়ে ওখানকার স্টপ লস কেটে দিয়েছে। এখন দেখার বিষয়: দাম ফিরে আসে, নাকি আরও ${up ? "ওঠে" : "নামে"}।`, hist("race_sweep_reversal")]);
     }
     const z = nearestZones(m, price, 1);
     for (const [zone, dir] of [[z.below[0], "নিচে"], [z.above[0], "উপরে"]]) {
       if (!zone) continue;
-      items.push(["fvg", `${dir} <b>${money(zone.bottom, metal)}</b> – <b>${money(zone.top, metal)}</b>: ${zoneName(zone)}। দাম ফিরে এলে এখানে প্রতিক্রিয়া দেখাতে পারে।`,
+      const what = zone.kind === "fvg" ? "এখানে আগে দাম খুব দ্রুত সরে গিয়েছিল, একটা ফাঁক রয়ে গেছে"
+        : zone.direction > 0 ? "এখান থেকে আগে বড় কেনা শুরু হয়েছিল" : "এখান থেকে আগে বড় বিক্রি শুরু হয়েছিল";
+      items.push(["fvg", `${dir} <b>${money(zone.bottom, metal)}</b> – <b>${money(zone.top, metal)}</b>: ${what}। দাম ফিরে এলে এখানে থামতে পারে।`,
         hist(zone.kind === "fvg" ? "race_fvg_first_test" : "race_ob_first_test")]);
     }
     const f = m.forecast;
     if (f && forecastFresh(f)) {
-      items.push(["gold", `আমাদের পরীক্ষিত মডেল: আগামী ৪ ঘণ্টায় ৮০% সম্ভাবনায় দাম <b>${money(f.quantiles_price.q100, metal)}</b> – <b>${money(f.quantiles_price.q900, metal)}</b> এর মধ্যে থাকবে।`,
-        `<span class="hist edge">পরীক্ষায় ${pct(m.exam.coverage["80"])} সঠিক</span>`]);
+      items.push(["gold", `আমাদের মডেল বলছে: আগামী ৪ ঘণ্টায় দাম ১০ বারে ৮ বার <b>${money(f.quantiles_price.q100, metal)}</b> থেকে <b>${money(f.quantiles_price.q900, metal)}</b> এর মধ্যে থাকে।`,
+        `<span class="hist edge">পরীক্ষায় মিলেছে ${pct(m.exam.coverage["80"])}</span>`]);
     }
     const ev = (state.data.events || []).find((e) => new Date(e.time_utc).getTime() > Date.now());
     if (ev) {
       const dt = new Date(ev.time_utc).getTime() - Date.now();
-      if (dt < 24 * 3600e3) items.push(["warn", `${relative(dt)} পরে ${esc(ev.name)}। খবরের সময় দাম হঠাৎ লাফ দেয়, কাছের স্টপ সহজে কেটে যায়।`, ""]);
+      if (dt < 24 * 3600e3) items.push(["warn", `${relative(dt)} পরে ${esc(ev.name)}। খবরের সময় দাম হঠাৎ লাফ দেয়, কাছের স্টপ লস সহজে কেটে যায়।`, ""]);
     }
     $("story").innerHTML = items.map(([ic, text, h]) => `<li><span class="ic ${ic}"></span><span>${text}</span>${h || "<span></span>"}</li>`).join("");
   }
@@ -447,7 +451,7 @@
     const mc = m.macro;
     $("macro").innerHTML = mc.items.map((it) => `<li><span class="dot ${it.effect}"></span><span><span class="lab">${esc(it.label)}</span><span class="val">${esc(bn(it.value))}</span>
       <span class="txt">${esc(it.text)}</span></span></li>`).join("") || `<li><span></span><span class="txt">পটভূমির তথ্য পাওয়া যায়নি।</span></li>`;
-    $("macro-note").textContent = `${mc.as_of ? bn(mc.as_of) + " পর্যন্ত। " : ""}সবুজ = সাধারণত পক্ষে, লাল = বিপক্ষে। আমাদের পরীক্ষায় এগুলো দিয়ে এক সপ্তাহ বা এক মাসের দিক আগাম বলা যায়নি: এগুলো পটভূমি, সংকেত নয়।`;
+    $("macro-note").textContent = `${mc.as_of ? bn(mc.as_of) + " পর্যন্ত। " : ""}সবুজ = সাধারণত দামের জন্য ভালো, লাল = খারাপ। তবে আমাদের পরীক্ষায় এগুলো দিয়ে আগামী সপ্তাহ বা মাসের দিক বলা যায়নি। শুধু পটভূমি হিসেবে দেখুন।`;
   }
 
   // ---------------------------------------------------------------- trade planner
@@ -458,53 +462,53 @@
     const side = P.side, long = side > 0, atrv = lay.atr, spread = r.spread_typical || 0, tfInfo = TF[state.tf];
     const price = currentPrice();
     const buf = Math.max(0.25 * atrv, 3 * spread);
-    let entry = price, mode = "now", zone = null, entryWhy = "এখনকার বাজার দামে";
+    let entry = price, mode = "now", zone = null, entryWhy = "এখনকার দামে";
     if (P.mode === "pullback") {
       const zs = lay.zones.filter((z) => z.direction === side && (long ? z.top < price : z.bottom > price) && Math.abs((long ? z.top : z.bottom) - price) <= 3 * atrv)
         .sort((a, b) => long ? b.top - a.top : a.bottom - b.bottom);
       if (zs.length) {
         zone = zs[0]; mode = "pullback"; entry = long ? zone.top : zone.bottom;
-        entryWhy = `দাম ফিরে এলে ${zoneName(zone)} এর কিনারায় লিমিট অর্ডার`;
-      } else entryWhy = "কাছে কোনো উপযুক্ত অঞ্চল নেই, তাই বাজার দামে";
+        entryWhy = `দাম ফিরে এসে ${zoneName(zone)} ছুঁলে (লিমিট অর্ডার)`;
+      } else entryWhy = "কাছে ফিরে আসার মতো জায়গা নেই, তাই এখনকার দামে";
     }
     // Stop: beyond the swing that protects the idea, with a buffer; never inside normal 4h noise.
     const guard = lay.swings.filter((s) => s.kind === (long ? "low" : "high") && (long ? s.price < entry : s.price > entry)).sort((a, b) => b.time - a.time)[0];
     let sl, slWhy;
-    if (guard) { sl = guard.price - side * buf; slWhy = `${tfInfo.of} সর্বশেষ ${guard.label} (${money(guard.price, metal)}) এর ${long ? "নিচে" : "উপরে"}, একটু ফাঁক রেখে`; }
-    else { sl = entry - side * 1.5 * atrv; slWhy = "কাছে কোনো কাঠামো নেই, তাই ১.৫ গুণ ATR দূরে"; }
+    if (guard) { sl = guard.price - side * buf; slWhy = `${tfInfo.of} চার্টের শেষ ${long ? "তলের" : "চূড়ার"} (${money(guard.price, metal)}) একটু ${long ? "নিচে" : "ওপরে"}`; }
+    else { sl = entry - side * 1.5 * atrv; slWhy = "কাছে কোনো চূড়া-তল নেই, তাই স্বাভাবিক ওঠানামার দেড় গুণ দূরে"; }
     if (zone) {
       const beyond = long ? zone.bottom - buf : zone.top + buf;
-      if (long ? beyond < sl : beyond > sl) { sl = beyond; slWhy = "অঞ্চলের ওপারে, একটু ফাঁক রেখে"; }
+      if (long ? beyond < sl : beyond > sl) { sl = beyond; slWhy = "ওই জায়গার একটু ওপারে"; }
     }
     let widened = false;
     if (f) {
       // The cone is for 4 hours; on the 1h chart its edge is scaled to one hour (square-root of time, as drawn).
       const noise = entry * Math.exp((long ? f.quantiles_return.q100 : f.quantiles_return.q900) * Math.sqrt(tfInfo.hours / 4));
       const limit = noise - side * buf;
-      if (long ? sl > limit : sl < limit) { sl = limit; widened = true; slWhy += `; স্বাভাবিক ${tfInfo.bn}র ওঠানামার বাইরে সরানো হয়েছে`; }
+      if (long ? sl > limit : sl < limit) { sl = limit; widened = true; slWhy += "; সাধারণ ঝাঁকুনিতে যেন না কাটে, তাই আরও একটু দূরে"; }
     }
     const risk = Math.abs(entry - sl);
     if (!(risk > 0)) return { ok: false, why: "স্টপ হিসাব করা যায়নি।" };
 
     // Targets: resting liquidity and opposing zones on the profit side, taken slightly before the level.
     const cands = [];
-    for (const p of pools(m)) if (long ? p.price > entry : p.price < entry) cands.push({ level: p.price, why: `${p.names.join(" ও ")}: স্টপ জমে আছে` });
+    for (const p of pools(m)) if (long ? p.price > entry : p.price < entry) cands.push({ level: p.price, why: `${p.names.join(" ও ")}, এখানে অনেকের স্টপ লস` });
     if (state.tf === "1h") {
       // Higher-timeframe liquidity is a natural target for an entry timed on the 1h chart.
-      for (const p of r.tf["4h"].pools) if (long ? p.price > entry : p.price < entry) cands.push({ level: p.price, why: `৪ ঘণ্টার ${poolName(p)}: স্টপ জমে আছে` });
+      for (const p of r.tf["4h"].pools) if (long ? p.price > entry : p.price < entry) cands.push({ level: p.price, why: `৪ ঘণ্টার চার্টের ${poolName(p)}, এখানে অনেকের স্টপ লস` });
     }
-    for (const z of lay.zones) if (z.direction === -side && (long ? z.bottom > entry : z.top < entry)) cands.push({ level: long ? z.bottom : z.top, why: `${zoneName(z)} শুরু` });
-    if (lay.range) { const lv = long ? lay.range.high : lay.range.low; if (long ? lv > entry : lv < entry) cands.push({ level: lv, why: "সাম্প্রতিক পরিসরের প্রান্ত" }); }
-    for (const lv of r.round_levels) if (long ? lv > entry : lv < entry) cands.push({ level: lv, why: "রাউন্ড নম্বর" });
+    for (const z of lay.zones) if (z.direction === -side && (long ? z.bottom > entry : z.top < entry)) cands.push({ level: long ? z.bottom : z.top, why: `${zoneName(z)} শুরু হয় এখানে` });
+    if (lay.range) { const lv = long ? lay.range.high : lay.range.low; if (long ? lv > entry : lv < entry) cands.push({ level: lv, why: "সাম্প্রতিক ওঠানামার শেষ সীমা" }); }
+    for (const lv of r.round_levels) if (long ? lv > entry : lv < entry) cands.push({ level: lv, why: "গোল সংখ্যা, এখানে অনেকে অর্ডার রাখে" });
     cands.sort((a, b) => side * (a.level - b.level));
     const merged = [];
     for (const c of cands) {
       const prev = merged[merged.length - 1];
       if (prev && Math.abs(prev.level - c.level) < 0.2 * atrv) { if (!prev.why.includes(c.why)) prev.why += `; ${c.why}`; } else merged.push({ ...c });
     }
-    const asTarget = (c) => ({ price: c.level - side * 0.1 * atrv, why: `${c.why} (একটু আগে লাভ তোলা)`, level: c.level });
+    const asTarget = (c) => ({ price: c.level - side * 0.1 * atrv, why: `${c.why}; লাভ একটু আগেই তুলুন`, level: c.level });
     let tp1 = merged.map(asTarget).find((t) => Math.abs(t.price - entry) >= risk);
-    if (!tp1) tp1 = { price: entry + side * 1.5 * risk, why: "কাছে কোনো স্টপের জায়গা নেই: ঝুঁকির ১.৫ গুণ" };
+    if (!tp1) tp1 = { price: entry + side * 1.5 * risk, why: "কাছে কোনো লক্ষ্য নেই, তাই ঝুঁকির দেড় গুণ দূরে" };
     const d1 = Math.abs(tp1.price - entry);
     let tp2 = merged.map(asTarget).find((t) => Math.abs(t.price - entry) >= Math.max(2 * risk, d1 + 0.5 * risk)) || null;
 
@@ -525,33 +529,33 @@
     // Checklist: risk-control rules decide the verdict; chart-context items are shown with their history.
     const checks = [];
     const t4 = r.trend[state.tf].key, td = r.trend["1d"].key, want = long ? "up" : "down", against = long ? "down" : "up";
-    if (t4 === want && td === want) checks.push(["in", "✓", `${tfInfo.bn} ও দৈনিক প্রবণতার সাথে`, hist("race_trend_aligned")]);
-    else if (t4 === against && td === against) checks.push(["wa", "!", `${tfInfo.bn} ও দৈনিক প্রবণতার বিপরীতে: পাল্টা ট্রেড, তাই লক্ষ্য কাছে রাখুন`, hist("race_trend_aligned")]);
-    else checks.push(["in", "·", "প্রবণতা মিশ্র", ""]);
+    if (t4 === want && td === want) checks.push(["in", "✓", "দাম যে দিকে যাচ্ছে, সেদিকেই ট্রেড করছেন", hist("race_trend_aligned")]);
+    else if (t4 === against && td === against) checks.push(["wa", "!", "দাম যে দিকে যাচ্ছে, তার উল্টো দিকে ট্রেড করছেন: লক্ষ্য কাছে রাখুন", hist("race_trend_aligned")]);
+    else checks.push(["in", "·", "দামের দিক এখন পরিষ্কার নয়", ""]);
     if (lay.range) {
       const pos = (entry - lay.range.low) / (lay.range.high - lay.range.low);
       const good = long ? pos < 0.5 : pos > 0.5;
-      checks.push(["in", good ? "✓" : "·", good ? (long ? "ডিসকাউন্টে কিনছেন (সস্তা জায়গা)" : "প্রিমিয়ামে বেচছেন (দামি জায়গা)") : (long ? "প্রিমিয়ামে কিনছেন (দামি জায়গা)" : "ডিসকাউন্টে বেচছেন (সস্তা জায়গা)"), hist("race_discount_premium")]);
+      checks.push(["in", good ? "✓" : "·", good ? (long ? "সস্তা জায়গায় কিনছেন" : "দামি জায়গায় বেচছেন") : (long ? "দামি জায়গায় কিনছেন" : "সস্তা জায়গায় বেচছেন"), hist("race_discount_premium")]);
     }
-    checks.push(widened ? ["ok", "✓", "কাঠামোর স্টপ স্বাভাবিক ওঠানামার ভেতরে ছিল, তাই নিরাপদ দূরত্বে সরানো হয়েছে", ""]
-      : ["ok", "✓", f ? `স্টপ স্বাভাবিক ${tfInfo.bn}র ওঠানামার বাইরে` : "স্টপ কাঠামোর ওপারে", ""]);
-    checks.push(tp1.r >= 1.5 ? ["ok", "✓", `ঝুঁকি:লাভ ১:${fmtR.format(tp1.r)} (TP1)`, ""] : tp1.r >= 1 ? ["wa", "!", `ঝুঁকি:লাভ মাত্র ১:${fmtR.format(tp1.r)}`, ""] : ["no", "✗", `ঝুঁকি:লাভ ১:${fmtR.format(tp1.r)}, লাভের চেয়ে ঝুঁকি বেশি`, ""]);
+    checks.push(widened ? ["ok", "✓", "স্টপ লস খুব কাছে ছিল, তাই একটু দূরে সরানো হয়েছে", ""]
+      : ["ok", "✓", "স্টপ লস সাধারণ ঝাঁকুনির বাইরে আছে", ""]);
+    checks.push(tp1.r >= 1.5 ? ["ok", "✓", `সম্ভাব্য লাভ ঝুঁকির ${fmtR.format(tp1.r)} গুণ`, ""] : tp1.r >= 1 ? ["wa", "!", `সম্ভাব্য লাভ ঝুঁকির মাত্র ${fmtR.format(tp1.r)} গুণ`, ""] : ["no", "✗", "সম্ভাব্য লাভ ঝুঁকির চেয়েও কম", ""]);
     const ev = (state.data.events || []).find((e) => new Date(e.time_utc).getTime() > Date.now());
     const evIn = ev ? new Date(ev.time_utc).getTime() - Date.now() : Infinity;
-    if (evIn < 3600e3) checks.push(["no", "✗", `${relative(evIn)} পরে ${ev.name}: খবরের ঠিক আগে নতুন ট্রেড নেবেন না`, ""]);
-    else if (evIn < 4 * 3600e3) checks.push(["wa", "!", `${relative(evIn)} পরে ${ev.name}: তার আগে লাভ তুলুন বা স্টপ এন্ট্রিতে আনুন`, ""]);
-    else checks.push(["ok", "✓", "আগামী ৪ ঘণ্টায় বড় মার্কিন খবর নেই", ""]);
+    if (evIn < 3600e3) checks.push(["no", "✗", `${relative(evIn)} পরে ${ev.name}: বড় খবরের ঠিক আগে নতুন ট্রেড নেবেন না`, ""]);
+    else if (evIn < 4 * 3600e3) checks.push(["wa", "!", `${relative(evIn)} পরে ${ev.name}: খবরের আগেই লাভ তুলে নিন বা স্টপ লস ঢোকার দামে আনুন`, ""]);
+    else checks.push(["ok", "✓", "আগামী ৪ ঘণ্টায় বড় কোনো খবর নেই", ""]);
     const sp = spreadUsd / riskUsd;
-    checks.push(sp < 0.05 ? ["ok", "✓", `স্প্রেড খরচ ঝুঁকির ${pct(sp, 0)}`, ""] : sp < 0.15 ? ["wa", "!", `স্প্রেড খরচ ঝুঁকির ${pct(sp, 0)}`, ""] : ["no", "✗", `স্প্রেড খরচ ঝুঁকির ${pct(sp, 0)}: স্টপ খুব কাছে`, ""]);
+    checks.push(sp < 0.05 ? ["ok", "✓", `ব্রোকারের খরচ (স্প্রেড) কম: ঝুঁকির ${pct(sp, 0)}`, ""] : sp < 0.15 ? ["wa", "!", `ব্রোকারের খরচ (স্প্রেড) ঝুঁকির ${pct(sp, 0)}`, ""] : ["no", "✗", `ব্রোকারের খরচই ঝুঁকির ${pct(sp, 0)}: স্টপ লস খুব কাছে`, ""]);
     const rb = riskUsd / budget;
-    if (minLot && rb > 0.03) checks.push(["no", "✗", `বাজেট কম: ন্যূনতম ০.০১ লটেও ঝুঁকি বাজেটের ${pct(rb)}`, ""]);
-    else if (minLot) checks.push(["wa", "!", `ন্যূনতম ০.০১ লট: ঝুঁকি বাজেটের ${pct(rb)}`, ""]);
-    else checks.push(["ok", "✓", `ঝুঁকি বাজেটের ${pct(rb)}`, ""]);
-    if (margin > budget) checks.push(["no", "✗", `মার্জিন ${usd(margin)} বাজেটের চেয়ে বেশি`, ""]);
-    else if (margin > 0.5 * budget) checks.push(["wa", "!", `মার্জিন ${usd(margin)}, বাজেটের অর্ধেকের বেশি`, ""]);
-    if (f && f.mood && f.mood.key === "extreme") checks.push(["wa", "!", "বাজার অত্যন্ত অস্থির: লট কমান", ""]);
+    if (minLot && rb > 0.03) checks.push(["no", "✗", `বাজেট কম: সবচেয়ে ছোট লটেও (০.০১) বাজেটের ${pct(rb)} হারানোর ঝুঁকি`, ""]);
+    else if (minLot) checks.push(["wa", "!", `সবচেয়ে ছোট লট (০.০১): বাজেটের ${pct(rb)} ঝুঁকিতে`, ""]);
+    else checks.push(["ok", "✓", `হারালে বাজেটের মাত্র ${pct(rb)} যাবে`, ""]);
+    if (margin > budget) checks.push(["no", "✗", `এই ট্রেডে ${usd(margin)} আটকে থাকবে, যা বাজেটের চেয়ে বেশি`, ""]);
+    else if (margin > 0.5 * budget) checks.push(["wa", "!", `এই ট্রেডে ${usd(margin)} আটকে থাকবে, বাজেটের অর্ধেকের বেশি`, ""]);
+    if (f && f.mood && f.mood.key === "extreme") checks.push(["wa", "!", "বাজার এখন খুব অস্থির: লট কমান", ""]);
     const nNo = checks.filter((c) => c[0] === "no").length, nWa = checks.filter((c) => c[0] === "wa").length;
-    const verdict = nNo ? ["avoid", "এই পরিকল্পনা এড়িয়ে চলুন"] : nWa >= 2 ? ["care", "সাবধানে: নিচের সতর্কতাগুলো দেখুন"] : ["good", "পরিকল্পনা ঝুঁকির নিয়ম মেনে চলছে"];
+    const verdict = nNo ? ["avoid", "এই ট্রেড এখন নেবেন না"] : nWa >= 2 ? ["care", "নিতে পারেন, তবে সাবধানে"] : ["good", "পরিকল্পনা ঠিক আছে"];
     return { ok: true, side, mode, entry, entryWhy, sl, slWhy, widened, tp1, tp2, lots, minLot, riskUsd, margin, spreadUsd, checks, verdict, event: evIn < 24 * 3600e3 ? ev : null };
   }
 
@@ -564,39 +568,40 @@
     const out = $("plan-out"), metal = state.metal;
     if (!p.ok) { out.innerHTML = `<p class="note">${esc(p.why)}</p>`; updatePlanLines(); requestDraw(); return; }
     const sideWord = p.side > 0 ? "কিনুন" : "বেচুন";
+    const ratio = (r) => `১ টাকা ঝুঁকিতে ${fmtR.format(r)} টাকা লাভ`;
     const lvl = (cls, k, price, s) => `<div class="lvl ${cls}"><div class="k">${k}</div><div class="p">${money(price, metal)}</div><div class="s">${esc(s)}</div></div>`;
     const half = p.lots >= 0.02;
     const halfLots = Math.floor(p.lots * 50 + 1e-9) / 100;
     const calib = reality(metalData()).planner_tp2_sl1;
     const steps = [
-      `${p.mode === "pullback" ? "লিমিট অর্ডারে" : "বাজার দামে"} ${sideWord}: <b>${money(p.entry, metal)}</b>, <b>${fmtLot.format(p.lots)}</b> লট।`,
-      `স্টপ লস <b>${money(p.sl, metal)}</b> এ সাথে সাথে বসান। লোকসান বাড়লে স্টপ কখনো দূরে সরাবেন না।`,
-      half ? `TP1 <b>${money(p.tp1.price, metal)}</b> এ <b>${fmtLot.format(halfLots)}</b> লট বন্ধ করুন এবং স্টপ এন্ট্রিতে আনুন: বাকি ট্রেড তখন ঝুঁকিমুক্ত।`
-        : `TP1 <b>${money(p.tp1.price, metal)}</b> এ পুরো ট্রেড বন্ধ করুন (লট ছোট, ভাগ করা যায় না)।`,
-      p.tp2 && half ? `বাকি অংশ TP2 <b>${money(p.tp2.price, metal)}</b> এ, অথবা প্রতিটি নতুন ${p.side > 0 ? "উঁচু তলের নিচে" : "নিচু চূড়ার উপরে"} স্টপ টেনে আনুন।` : null,
-      `${bn(TF[state.tf].timeStop)} ঘণ্টায় কোনোটি না হলে বা ${TF[state.tf].of} কাঠামো উল্টে গেলে (বিপরীত CHoCH) ট্রেড আবার বিবেচনা করুন।`,
-      p.event ? `${esc(p.event.name)} (${esc(fmtDateTime.format(new Date(p.event.time_utc)))}) এর আগে লাভ তুলুন বা স্টপ এন্ট্রিতে আনুন।` : null,
+      `${p.mode === "pullback" ? "লিমিট অর্ডার দিয়ে" : "এখনই"} ${sideWord}: দাম <b>${money(p.entry, metal)}</b>, <b>${fmtLot.format(p.lots)}</b> লট।`,
+      `সাথে সাথে স্টপ লস <b>${money(p.sl, metal)}</b> বসান। ক্ষতি বাড়লেও স্টপ লস সরাবেন না।`,
+      half ? `দাম <b>${money(p.tp1.price, metal)}</b> ছুঁলে অর্ধেক (<b>${fmtLot.format(halfLots)}</b> লট) বন্ধ করুন, আর স্টপ লস ঢোকার দামে নিয়ে আসুন। তখন বাকিটায় আর ক্ষতির ভয় নেই।`
+        : `দাম <b>${money(p.tp1.price, metal)}</b> ছুঁলে পুরোটা বন্ধ করুন (লট ছোট, ভাগ করা যায় না)।`,
+      p.tp2 && half ? `বাকি অর্ধেক <b>${money(p.tp2.price, metal)}</b> এ বন্ধ করুন।` : null,
+      `${bn(TF[state.tf].timeStop)} ঘণ্টায় কিছু না হলে, বা দাম উল্টো দিকে ঘুরে গেলে, ট্রেডটা নিয়ে আবার ভাবুন।`,
+      p.event ? `${esc(p.event.name)} (${esc(fmtDateTime.format(new Date(p.event.time_utc)))}) এর আগে লাভ তুলে নিন, বা স্টপ লস ঢোকার দামে আনুন।` : null,
     ].filter(Boolean);
     out.innerHTML = `
       <div class="plan-verdict ${p.verdict[0]}"><div class="v">${p.verdict[1]}</div>
-        <div class="note">স্টপের আগে TP1 ছোঁয়ার সম্ভাবনা ${pct(p.tp1.win, 0)} · ঝুঁকি:লাভ ১:${fmtR.format(p.tp1.r)}। দিক নিয়ে কোনো প্রমাণিত সুবিধা নেই, তাই এই সম্ভাবনা শুধু দূরত্ব থেকে আসে${calib ? `; ইতিহাসে মিলেছে (২:১ লক্ষ্যে ${pct(calib.rate, 0)}, হিসাবে ৩৩%)` : ""}।</div></div>
+        <div class="note">স্টপ লসের আগে প্রথম লক্ষ্যে পৌঁছানোর সম্ভাবনা ${pct(p.tp1.win, 0)}; ${ratio(p.tp1.r)}। দাম কোন দিকে যাবে কেউ নিশ্চিত জানে না, তাই এই সম্ভাবনা শুধু দূরত্ব দেখে হিসাব করা${calib ? `, আর অতীতের ডেটার সাথে মিলেছে (২ গুণ লাভের লক্ষ্যে ${pct(calib.rate, 0)}, হিসাবে ৩৩%)` : ""}।</div></div>
       <div class="levels">
-        ${lvl("entry", p.mode === "pullback" ? "লিমিট এন্ট্রি" : "এন্ট্রি", p.entry, p.entryWhy)}
-        ${lvl("sl", "স্টপ লস", p.sl, p.slWhy)}
-        ${lvl("tp", `TP1 · ১:${fmtR.format(p.tp1.r)}`, p.tp1.price, p.tp1.why)}
-        ${p.tp2 ? lvl("tp", `TP2 · ১:${fmtR.format(p.tp2.r)}`, p.tp2.price, p.tp2.why) : `<div class="lvl"><div class="k">TP2</div><div class="p">—</div><div class="s">আরও দূরে উপযুক্ত লক্ষ্য নেই</div></div>`}
+        ${lvl("entry", "ঢোকার দাম", p.entry, p.entryWhy)}
+        ${lvl("sl", "স্টপ লস (এখানে বেরিয়ে যাবেন)", p.sl, p.slWhy)}
+        ${lvl("tp", `লাভ তোলা ১ · ঝুঁকির ${fmtR.format(p.tp1.r)} গুণ`, p.tp1.price, p.tp1.why)}
+        ${p.tp2 ? lvl("tp", `লাভ তোলা ২ · ঝুঁকির ${fmtR.format(p.tp2.r)} গুণ`, p.tp2.price, p.tp2.why) : `<div class="lvl"><div class="k">লাভ তোলা ২</div><div class="p">—</div><div class="s">আরও দূরে ভালো লক্ষ্য নেই</div></div>`}
       </div>
       <div class="facts">
-        <div class="fact"><div class="k">লট সাইজ</div><div class="p">${fmtLot.format(p.lots)}</div></div>
-        <div class="fact"><div class="k">স্টপ লাগলে ক্ষতি</div><div class="p down">${usd(p.riskUsd)}</div></div>
-        <div class="fact"><div class="k">TP1 / TP2 এ লাভ</div><div class="p up">${usd(p.tp1.profit)}${p.tp2 ? " / " + usd(p.tp2.profit) : ""}</div></div>
-        <div class="fact"><div class="k">৪ ঘণ্টায় TP1 ছোঁয়ার সম্ভাবনা</div><div class="p">${p.tp1.touch === null ? "—" : pct(p.tp1.touch, 0)}</div></div>
-        <div class="fact"><div class="k">মার্জিন লাগবে</div><div class="p">${usd(p.margin)}</div></div>
-        <div class="fact"><div class="k">আনুমানিক স্প্রেড খরচ</div><div class="p">${usd(p.spreadUsd)}</div></div>
+        <div class="fact"><div class="k">কত লট নেবেন</div><div class="p">${fmtLot.format(p.lots)}</div></div>
+        <div class="fact"><div class="k">হারালে ক্ষতি</div><div class="p down">${usd(p.riskUsd)}</div></div>
+        <div class="fact"><div class="k">জিতলে লাভ (১ / ২)</div><div class="p up">${usd(p.tp1.profit)}${p.tp2 ? " / " + usd(p.tp2.profit) : ""}</div></div>
+        <div class="fact"><div class="k">৪ ঘণ্টার মধ্যে লক্ষ্য ১ ছোঁয়ার সম্ভাবনা</div><div class="p">${p.tp1.touch === null ? "—" : pct(p.tp1.touch, 0)}</div></div>
+        <div class="fact"><div class="k">অ্যাকাউন্টে আটকে থাকবে (মার্জিন)</div><div class="p">${usd(p.margin)}</div></div>
+        <div class="fact"><div class="k">ব্রোকারের খরচ (স্প্রেড, আনুমানিক)</div><div class="p">${usd(p.spreadUsd)}</div></div>
       </div>
-      <h3>যাচাই তালিকা</h3>
+      <h3>ঝুঁকির হিসাব</h3>
       <ul class="checks">${p.checks.map(([cls, mark, text, h]) => `<li><span class="${cls}">${mark}</span><span>${esc(text)} ${h}</span></li>`).join("")}</ul>
-      <h3>ট্রেড চালানোর ধাপ</h3>
+      <h3>কী করবেন, ধাপে ধাপে</h3>
       <ol class="steps">${steps.map((s) => `<li>${s}</li>`).join("")}</ol>`;
     updatePlanLines();
     requestDraw();
@@ -632,7 +637,7 @@
     const sync = () => {
       for (const b of document.querySelectorAll("#tf-switch button")) b.setAttribute("aria-selected", String(b.dataset.tf === state.tf));
       $("chart-sub").textContent = `${TF[state.tf].of} ক্যান্ডেল`;
-      $("plan-sub").textContent = `আপনার বাজেট ও দিক দিন; স্টপ ও লক্ষ্য ${TF[state.tf].of} চার্টের কাঠামো থেকে`;
+      $("plan-sub").textContent = `বাজেট আর দিক দিন; ${TF[state.tf].of} চার্ট দেখে বাকিটা আমরা হিসাব করব`;
     };
     sync();
     for (const b of document.querySelectorAll("#tf-switch button")) b.addEventListener("click", () => {
@@ -682,7 +687,7 @@
       const stale = !forecastFresh(f);
       $("verdict").innerHTML = stale
         ? `নতুন পূর্বাভাসের অপেক্ষায়। সর্বশেষ পূর্বাভাস (${esc(fmtDateTime.format(new Date(f.decision_time)))}): ৮০% সম্ভাবনায় <b>${money(q.q100, state.metal)}</b> থেকে <b>${money(q.q900, state.metal)}</b>।`
-        : `${NAMES[state.metal]}র দাম ৮০% সম্ভাবনায় <b>${money(q.q100, state.metal)}</b> থেকে <b>${money(q.q900, state.metal)}</b> এর মধ্যে থাকবে।`;
+        : `${NAMES[state.metal]}র দাম সম্ভবত <b>${money(q.q100, state.metal)}</b> থেকে <b>${money(q.q900, state.metal)}</b> এর মধ্যে থাকবে (১০ বারে ৮ বার এমন হয়)।`;
       const mood = f.mood;
       const moodText = { calm: "স্বাভাবিকের চেয়ে কম ওঠানামা", normal: "সাধারণ ওঠানামা", volatile: "স্বাভাবিকের চেয়ে বড় ওঠানামা", extreme: "বছরের সবচেয়ে বড় ওঠানামার মধ্যে" }[mood.key];
       chips.push(`<span class="chip ${mood.key}"><i></i>বাজার: ${esc(mood.label)} <span>${moodText}</span></span>`);

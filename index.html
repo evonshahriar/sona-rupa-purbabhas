@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
-<link rel="stylesheet" href="assets/style.css?v=7">
+<link rel="stylesheet" href="assets/style.css?v=8">
 </head>
 <body>
 <header class="topbar">
@@ -46,11 +46,11 @@
 
     <div class="card read-card">
       <div class="card-head">
-        <h2>বাজার পড়া <small>একজন অভিজ্ঞ ট্রেডারের চোখে, প্রতি ঘণ্টায় হালনাগাদ</small></h2>
+        <h2>বাজার এখন কেমন <small>অভিজ্ঞ ট্রেডার যা দেখেন, সহজ ভাষায় · প্রতি ঘণ্টায় হালনাগাদ</small></h2>
         <div class="mtf" id="mtf"></div>
       </div>
       <ul class="story" id="story"></ul>
-      <p class="note">প্রতিটি লাইনের পাশে লেখা আছে ২০০৩–২০২৩ সালে এই ধরনের পরিস্থিতি কতবার কাজ করেছে। কয়েন টসে ৫০%। ৫০% এর কাছাকাছি মানে প্যাটার্নটি দিক বলে না, শুধু মানচিত্র দেখায়।</p>
+      <p class="note">প্রতিটি লাইনের পাশে লেখা আছে, ২০০৩ থেকে ২০২৩ সালে এমন অবস্থার পর দাম কতবার সেই দিকে গেছে। কয়েন টস করলেও ৫০% মেলে। তাই ৫০% এর কাছাকাছি মানে: এটা দিক বলে না, শুধু দেখায় কোথায় কী আছে।</p>
     </div>
 
     <div class="card chart-card">
@@ -63,10 +63,10 @@
           </div>
         </div>
         <div class="layers" id="layers" role="group" aria-label="চার্টের স্তর">
-          <button data-layer="structure" aria-pressed="true">কাঠামো</button>
+          <button data-layer="structure" aria-pressed="true">চূড়া ও তল</button>
           <button data-layer="liquidity" aria-pressed="true">স্টপের জায়গা</button>
           <button data-layer="zones" aria-pressed="true">ফাঁক ও অঞ্চল</button>
-          <button data-layer="cone" aria-pressed="true">৪ ঘণ্টার পরিসর</button>
+          <button data-layer="cone" aria-pressed="true">সম্ভাব্য সীমা</button>
           <button data-layer="plan" aria-pressed="true">আমার পরিকল্পনা</button>
         </div>
       </div>
@@ -77,23 +77,22 @@
       <details class="glossary">
         <summary>চার্টের চিহ্নগুলো কী বোঝায়</summary>
         <dl>
-          <div><dt>HH / HL</dt><dd>আগের চেয়ে উঁচু চূড়া / উঁচু তল: ক্রেতারা নিয়ন্ত্রণে।</dd></div>
-          <div><dt>LH / LL</dt><dd>আগের চেয়ে নিচু চূড়া / নিচু তল: বিক্রেতারা নিয়ন্ত্রণে।</dd></div>
-          <div><dt>৪ ঘণ্টা / ১ ঘণ্টা</dt><dd>৪ ঘণ্টার চার্টে বড় ছবি ও প্রবণতা দেখুন; ১ ঘণ্টার চার্টে এন্ট্রির সময় ঠিক করুন। ১ ঘণ্টায় স্টপ ছোট হয়, তাই একই ঝুঁকিতে লট বড় হয়, কিন্তু ছোট ঝাঁকুনিতে স্টপ লাগার সম্ভাবনাও বাড়ে।</dd></div>
-          <div><dt>BOS</dt><dd>কাঠামো ভাঙা: দাম আগের চূড়া বা তলের ওপারে বন্ধ হয়েছে, প্রবণতা চলছে।</dd></div>
-          <div><dt>CHoCH</dt><dd>চরিত্র বদল: প্রবণতার বিপরীতে প্রথম ভাঙন, সম্ভাব্য মোড় ঘোরা।</dd></div>
-          <div><dt><i class="sw swliq"></i>স্টপের জায়গা</dt><dd>আগের চূড়া/তল, সমান চূড়া/তল, গতকাল ও গত সপ্তাহের উচ্চ-নিম্ন। এখানে অনেকের স্টপ লস থাকে, তাই বড় খেলোয়াড়রা প্রায়ই এগুলো ছুঁয়ে যায়।</dd></div>
-          <div><dt><i class="sw swfvg"></i>FVG (ফাঁক)</dt><dd>তিনটি ক্যান্ডেলের মাঝে দাম এত দ্রুত সরেছে যে একটি ফাঁকা জায়গা রয়ে গেছে।</dd></div>
-          <div><dt><i class="sw swdem"></i>চাহিদা / <i class="sw swsup"></i>সরবরাহ অঞ্চল</dt><dd>কাঠামো ভাঙার আগের শেষ বিপরীত ক্যান্ডেল (অর্ডার ব্লক): বড় অর্ডার যেখান থেকে শুরু হয়েছিল।</dd></div>
-          <div><dt>প্রিমিয়াম / ডিসকাউন্ট</dt><dd>সাম্প্রতিক চূড়া-তলের মাঝের রেখার উপরে দাম "দামি", নিচে "সস্তা"।</dd></div>
-          <div><dt><i class="sw sw80"></i>৪ ঘণ্টার পরিসর</dt><dd>আমাদের পরীক্ষিত মডেল: দাম ৮০% সম্ভাবনায় মাঝারি অংশে, ৯৫% সম্ভাবনায় হালকা অংশের ভেতরে থাকবে।</dd></div>
+          <div><dt>উঁচু / নিচু</dt><dd>প্রতিটি চূড়া বা তলের পাশে লেখা: আগেরটার চেয়ে উঁচু হলে সবুজ "উঁচু", নিচু হলে লাল "নিচু"। পরপর উঁচু মানে দাম উঠছে, পরপর নিচু মানে নামছে।</dd></div>
+          <div><dt>ভাঙন</dt><dd>দাম আগের চূড়ার ওপরে বা তলের নিচে বন্ধ হয়েছে। যে দিকে যাচ্ছিল, সেদিকেই চলছে। (ইংরেজিতে BOS)</dd></div>
+          <div><dt>মোড়</dt><dd>দাম এতদিন যে দিকে যাচ্ছিল, এই প্রথম উল্টো দিকে ভাঙল। দিক বদলাতে পারে। (ইংরেজিতে CHoCH)</dd></div>
+          <div><dt><i class="sw swliq"></i>স্টপের জায়গা</dt><dd>আগের চূড়া-তল, গতকাল আর গত সপ্তাহের সবচেয়ে বেশি ও কম দাম। এখানে অনেকে স্টপ লস রাখে, তাই দাম প্রায়ই এগুলো ছুঁয়ে আসে।</dd></div>
+          <div><dt><i class="sw swfvg"></i>ফাঁক</dt><dd>দাম এত দ্রুত সরেছিল যে মাঝে একটা ফাঁকা জায়গা রয়ে গেছে। দাম অনেক সময় ফিরে এসে এটা ভরে। (ইংরেজিতে FVG)</dd></div>
+          <div><dt><i class="sw swdem"></i>কেনার / <i class="sw swsup"></i>বেচার জায়গা</dt><dd>যেখান থেকে আগে বড় কেনা বা বড় বিক্রি শুরু হয়েছিল। (ইংরেজিতে অর্ডার ব্লক)</dd></div>
+          <div><dt>দামি / সস্তা</dt><dd>সাম্প্রতিক চূড়া আর তলের ঠিক মাঝখানে একটা দাগ আছে। দাগের ওপরে দাম "দামি", নিচে "সস্তা"।</dd></div>
+          <div><dt><i class="sw sw80"></i>সম্ভাব্য সীমা</dt><dd>হলুদ ছায়া: আগামী ৪ ঘণ্টায় দাম কোথায় থাকতে পারে। মাঝারি ছায়ার ভেতরে ১০ বারে ৮ বার, হালকা ছায়ার ভেতরে প্রায় সবসময়।</dd></div>
+          <div><dt>৪ ঘণ্টা / ১ ঘণ্টা</dt><dd>৪ ঘণ্টার চার্টে বড় ছবি দেখুন, ১ ঘণ্টার চার্টে ঢোকার সময় ঠিক করুন। ১ ঘণ্টায় স্টপ লস কাছে হয়, তাই লট বড় হয়। কিন্তু ছোট ঝাঁকুনিতেই স্টপ কেটে যাওয়ার ভয় বেশি।</dd></div>
         </dl>
       </details>
     </div>
 
     <div class="card planner" id="planner">
       <div class="card-head">
-        <h2>ট্রেড পরিকল্পনা <small id="plan-sub">আপনার বাজেট ও দিক দিন, বাকিটা চার্ট থেকে</small></h2>
+        <h2>ট্রেড পরিকল্পনা <small id="plan-sub">বাজেট আর দিক দিন, বাকিটা আমরা হিসাব করব</small></h2>
       </div>
       <div class="planner-grid">
         <form class="plan-form" id="plan-form" autocomplete="off" novalidate>
@@ -105,21 +104,21 @@
             <input id="plan-budget" type="number" inputmode="decimal" min="10" step="10" value="1000">
             <span class="field-error" id="budget-error"></span>
           </label>
-          <label>প্রতি ট্রেডে ঝুঁকি
+          <label>একটা ট্রেডে সর্বোচ্চ কত হারাতে রাজি
             <select id="plan-risk">
-              <option value="0.005">০.৫% (সাবধানী)</option>
-              <option value="0.01" selected>১% (প্রস্তাবিত)</option>
-              <option value="0.02">২%</option>
-              <option value="0.03">৩% (আক্রমণাত্মক)</option>
+              <option value="0.005">বাজেটের ০.৫% (খুব সাবধানী)</option>
+              <option value="0.01" selected>বাজেটের ১% (ভালো অভ্যাস)</option>
+              <option value="0.02">বাজেটের ২%</option>
+              <option value="0.03">বাজেটের ৩% (বেশি ঝুঁকি)</option>
             </select>
           </label>
-          <label>এন্ট্রি
+          <label>কখন ঢুকবেন
             <select id="plan-mode">
-              <option value="now" selected>এখনই, বাজার দামে</option>
-              <option value="pullback">ফিরে এলে, নিকটের অঞ্চলে (লিমিট)</option>
+              <option value="now" selected>এখনই</option>
+              <option value="pullback">দাম একটু ফিরে এলে</option>
             </select>
           </label>
-          <label>লিভারেজ
+          <label>লিভারেজ (ব্রোকারের সেটিং)
             <select id="plan-lev">
               <option value="50">১:৫০</option>
               <option value="100" selected>১:১০০</option>
@@ -130,7 +129,7 @@
         </form>
         <div class="plan-out" id="plan-out" aria-live="polite"></div>
       </div>
-      <p class="note">দিক আপনার সিদ্ধান্ত। ২৩ বছরের পরীক্ষায় কোনো চার্ট প্যাটার্ন বা সূচক দিক আগাম বলতে পারেনি, তাই আমরা দিক বেছে দিই না। আমরা দেখাই অভিজ্ঞ ট্রেডার কোথায় ঢোকেন, কোথায় স্টপ রাখেন, কোথায় লাভ তোলেন, আর কত লট নিলে একটি ভুলে অ্যাকাউন্ট শেষ হয় না।</p>
+      <p class="note">কিনবেন না বেচবেন, সেটা আপনার সিদ্ধান্ত। ২৩ বছরের ডেটায় কোনো চার্ট প্যাটার্ন আগে থেকে দিক বলতে পারেনি, তাই আমরা দিক বলি না। আমরা দেখাই: কোথায় ঢুকবেন, কোথায় থামবেন, কোথায় লাভ তুলবেন, আর কত লট নিলে একটা ভুলে অ্যাকাউন্ট শেষ হবে না।</p>
     </div>
 
     <div class="grid3">
@@ -144,7 +143,7 @@
         <p class="note">আগামী ৪ ঘণ্টায় প্রতিটি দিকে স্পর্শের সম্ভাবনা।</p>
       </div>
       <div class="card">
-        <h2>পটভূমি <small>ফান্ডামেন্টাল</small></h2>
+        <h2>বড় ছবি <small>ডলার, সুদ, বড় ফান্ড</small></h2>
         <ul class="macro" id="macro"></ul>
         <p class="note" id="macro-note"></p>
       </div>
@@ -194,6 +193,6 @@
 </footer>
 
 <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
-<script src="assets/app.js?v=7"></script>
+<script src="assets/app.js?v=8"></script>
 </body>
 </html>
