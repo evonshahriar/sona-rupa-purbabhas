@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>সোনা-রুপা পূর্বাভাস</title>
+<meta name="description" content="সোনা ও রুপার আগামী ৪ ঘণ্টার মূল্য পরিসরের পরীক্ষিত পূর্বাভাস। প্রতিটি পূর্বাভাস ফলাফলের আগে প্রকাশিত ও যাচাইযোগ্য।">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="wrap topbar-inner">
+    <a class="brand" href="#">সোনা-রুপা <span>পূর্বাভাস</span></a>
+    <nav aria-label="প্রধান">
+      <a href="#market">বাজার</a>
+      <a href="#record">ট্র্যাক রেকর্ড</a>
+      <a href="#method">পদ্ধতি</a>
+    </nav>
+    <div class="clock" id="clock" aria-live="off"></div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section id="market" class="market" aria-label="বাজার">
+    <div class="switch" role="tablist" aria-label="ধাতু নির্বাচন">
+      <button id="tab-gold" role="tab" aria-selected="true" data-metal="gold">সোনা <small>XAU/USD</small></button>
+      <button id="tab-silver" role="tab" aria-selected="false" data-metal="silver">রুপা <small>XAG/USD</small></button>
+    </div>
+
+    <div class="hero">
+      <div class="hero-price">
+        <div class="label"><span id="metal-name">সোনা</span> · প্রতি আউন্স (USD) <span class="live" id="live-status"><i></i><b>সংযোগ হচ্ছে</b></span></div>
+        <div class="price" id="price">—</div>
+        <div class="change" id="change">&nbsp;</div>
+      </div>
+      <div class="hero-verdict">
+        <div class="label">আগামী ৪ ঘণ্টা</div>
+        <p class="verdict" id="verdict">পূর্বাভাস লোড হচ্ছে…</p>
+        <div class="chips" id="chips"></div>
+        <div class="next" id="next-update"></div>
+      </div>
+    </div>
+
+    <div class="card chart-card">
+      <div class="card-head">
+        <h2>চার্ট <small>৪ ঘণ্টার ক্যান্ডেল · সামনের পরিসর</small></h2>
+        <div class="legend">
+          <span><i class="sw sw50"></i>৫০%</span><span><i class="sw sw80"></i>৮০%</span><span><i class="sw sw95"></i>৯৫%</span>
+        </div>
+      </div>
+      <div id="chart" class="chart" role="img" aria-label="সোনা বা রুপার ৪ ঘণ্টার চার্ট এবং আগামী ৪ ঘণ্টার সম্ভাব্য পরিসর"></div>
+      <p class="note">ছায়াযুক্ত অংশটি দাম কোথায় থাকতে পারে তার পরিসর, দিক নয়। গাঢ় অংশে থাকার সম্ভাবনা ৫০%, মাঝারি অংশ পর্যন্ত ৮০%, হালকা অংশ পর্যন্ত ৯৫%।</p>
+    </div>
+
+    <div class="grid3">
+      <div class="card">
+        <h2>সম্ভাব্য পরিসর</h2>
+        <table class="kv" id="range-table"><tbody></tbody></table>
+      </div>
+      <div class="card">
+        <h2>দাম কি এই স্তর ছুঁবে?</h2>
+        <table class="kv" id="touch-table"><tbody></tbody></table>
+        <p class="note">আগামী ৪ ঘণ্টায় প্রতিটি দিকে স্পর্শের সম্ভাবনা।</p>
+      </div>
+      <div class="card">
+        <h2>ট্রেড পরিকল্পনা সহায়িকা</h2>
+        <div id="helper" class="helper"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>সামনের গুরুত্বপূর্ণ খবর <small>মার্কিন, উচ্চ প্রভাব</small></h2>
+      <table class="list" id="events"><tbody></tbody></table>
+    </div>
+  </section>
+
+  <section id="record" class="record" aria-label="ট্র্যাক রেকর্ড">
+    <div class="section-head">
+      <h2>ট্র্যাক রেকর্ড</h2>
+      <p>পূর্বাভাস ঠিক হলো কি না, সংখ্যায়। ৮০% পরিসর সঠিক মানে দাম আসলেই ৮০% সময় সেই পরিসরের মধ্যে ছিল। লক্ষ্য ৮০%, এর বেশি বা কম দুটোই ভুল।</p>
+    </div>
+    <div class="stats" id="stats"></div>
+    <div class="card">
+      <h2>সাম্প্রতিক পূর্বাভাস <small id="history-metal"></small></h2>
+      <div class="table-wrap"><table class="list" id="history"><thead><tr><th>পূর্বাভাসের সময়</th><th>তখনকার দাম</th><th>৮০% পরিসর</th><th>৪ ঘণ্টা পরের দাম</th><th>ফল</th></tr></thead><tbody></tbody></table></div>
+    </div>
+    <div class="card ledger">
+      <h2>যাচাইযোগ্য লেজার</h2>
+      <p>প্রতিটি পূর্বাভাস ফলাফল জানার আগে একটি ধারাবাহিক তালিকায় যোগ হয়, যেখানে প্রতিটি লাইন আগের লাইনের হ্যাশ (SHA-256) বহন করে। পরে কোনো লাইন বদলালে বা মুছলে পরের সব হ্যাশ মিলবে না।</p>
+      <div class="ledger-row"><span>অবস্থা</span><b id="ledger-ok">—</b></div>
+      <div class="ledger-row"><span>মোট এন্ট্রি</span><b id="ledger-count">—</b></div>
+      <div class="ledger-row"><span>সর্বশেষ হ্যাশ</span><code id="ledger-head">—</code></div>
+      <p><a href="data/ledger.jsonl">পুরো লেজার ডাউনলোড করুন (JSON Lines)</a></p>
+    </div>
+  </section>
+
+  <section id="method" class="method" aria-label="পদ্ধতি">
+    <div class="section-head"><h2>পদ্ধতি</h2></div>
+    <div class="grid2">
+      <div class="card"><h3>এটা কী দেখায়</h3><p>প্রতি ৪ ঘণ্টায় একটি মডেল হিসাব করে আগামী ৪ ঘণ্টায় দাম কোন পরিসরে থাকার সম্ভাবনা কতটা। মডেলটি সাম্প্রতিক ওঠানামা, দিনের কোন সময়, সোমবারের খোলা, সোনার অস্থিরতা সূচক (GVZ) এবং মার্কিন গুরুত্বপূর্ণ খবরের সময়সূচি দেখে শেখে, আর প্রতিটি ফলাফলের পর নিজেকে সংশোধন করে।</p></div>
+      <div class="card"><h3>এটা কী দেখায় না</h3><p>দাম উঠবে না নামবে, তা এটি বলে না। ২০০৩ থেকে ২০২৬ পর্যন্ত আমরা ডজনখানেক জনপ্রিয় দিকনির্দেশক কৌশল কঠোরভাবে পরীক্ষা করেছি; কোনোটিই খরচ বাদ দিয়ে কয়েন টসের চেয়ে ভালো করেনি। তাই আমরা শুধু সেটাই দেখাই যা পরীক্ষায় টিকেছে: পরিসর।</p></div>
+      <div class="card"><h3>কীভাবে পরীক্ষা করা হয়েছে</h3><p>নিয়ম আগে থেকে লিখে রাখা হয়েছিল। ২০০৩–২০১৮ সালের ডেটায় মডেল বাছাই, ২০১৯–২০২৩ সালে যাচাই, আর ২০২৪–২০২৬ সালে একবারের চূড়ান্ত পরীক্ষা। দুই ধাতুই উত্তীর্ণ হয়েছে: ৮০% পরিসর ৮০.০% (সোনা) ও ৭৯.৮% (রুপা) সময় সঠিক ছিল, খবরের সময়েও ~৮২%, যেখানে প্রচলিত মডেল ৬০% এর কাছাকাছি।</p></div>
+      <div class="card"><h3>ডেটা ও দায়</h3><p>দামের ডেটা: Dukascopy (স্পট XAU/USD, XAG/USD)। লাইভ দাম Binance-এর গোল্ড/সিলভার চুক্তি থেকে, স্পট দামে সমন্বয় করে দেখানো হয়। এটি শিক্ষামূলক বিশ্লেষণ, বিনিয়োগ পরামর্শ নয়। ট্রেডিংয়ে মূলধন হারানোর ঝুঁকি আছে।</p></div>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap footer">
+  <span>সোনা-রুপা পূর্বাভাস · প্রতি ঘণ্টায় হালনাগাদ · <span id="generated"></span></span>
+  <span>বিনিয়োগ পরামর্শ নয়</span>
+</footer>
+
+<script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
