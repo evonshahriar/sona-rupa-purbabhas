@@ -109,7 +109,10 @@
       candles.createPriceLine({ price: q.q900, color: `rgba(${rgb}, 0.9)`, lineWidth: 1, lineStyle: 2, axisLabelVisible: true, title: "৮০% উপরে" });
       candles.createPriceLine({ price: q.q100, color: `rgba(${rgb}, 0.9)`, lineWidth: 1, lineStyle: 2, axisLabelVisible: true, title: "৮০% নিচে" });
     }
-    chart.timeScale().scrollToRealTime();
+    // Open on the last few days so the projected cone is easy to see (drag or pinch to see more history).
+    const shown = window.matchMedia("(max-width: 640px)").matches ? 24 : 42;
+    const n = m.bars.length;
+    chart.timeScale().setVisibleLogicalRange({ from: Math.max(0, n - shown), to: n + 5 });
     applyLiveToChart();
   }
 
