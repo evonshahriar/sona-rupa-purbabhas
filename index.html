@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>সোনা-রুপা পূর্বাভাস</title>
-<meta name="description" content="সোনা ও রুপার চার্ট অভিজ্ঞ ট্রেডারের চোখে: কাঠামো, স্টপের জায়গা, অঞ্চল, ট্রেড পরিকল্পনা ও আগামী ৪ ঘণ্টার পরীক্ষিত মূল্য পরিসর। প্রতিটি পূর্বাভাস ফলাফলের আগে প্রকাশিত ও যাচাইযোগ্য।">
+<meta name="description" content="সোনা ও রুপার চার্ট অভিজ্ঞ ট্রেডারের চোখে: মার্কেট স্ট্রাকচার, লিকুইডিটি, FVG ও অর্ডার ব্লক, ট্রেড প্ল্যান, অ্যালার্ট ও আগামী ৪ ঘণ্টার পরীক্ষিত রেঞ্জ। প্রতিটি পূর্বাভাস ফলাফলের আগে প্রকাশিত ও যাচাইযোগ্য।">
 <script>
   // Apply the saved theme and language before first paint (no flash of the wrong theme).
   (function () {
@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
-<link rel="stylesheet" href="assets/style.css?v=12">
+<link rel="stylesheet" href="assets/style.css?v=13">
 </head>
 <body>
 <header class="topbar">
@@ -30,6 +30,10 @@
     </nav>
     <div class="clock" id="clock" aria-live="off"></div>
     <div class="prefs">
+      <button type="button" id="alert-btn" class="pref icon" aria-haspopup="dialog" aria-expanded="false" aria-controls="alert-panel" data-i18n-aria="alerts_aria" aria-label="অ্যালার্ট">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <span class="badge" id="alert-badge" hidden></span>
+      </button>
       <button type="button" id="lang-toggle" class="pref" lang="en">English</button>
       <button type="button" id="theme-toggle" class="pref icon" aria-label="রাতের রঙ">
         <svg class="moon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
@@ -78,29 +82,29 @@
             <button role="tab" data-tf="1h" aria-selected="false" data-i18n="tf_1h">১ ঘণ্টা</button>
           </div>
         </div>
-        <div class="layers" id="layers" role="group" data-i18n-aria="layers_aria" aria-label="চার্টের স্তর">
-          <button data-layer="structure" aria-pressed="true" data-i18n="layer_structure">চূড়া ও তল</button>
-          <button data-layer="liquidity" aria-pressed="true" data-i18n="layer_liquidity">স্টপের জায়গা</button>
-          <button data-layer="zones" aria-pressed="true" data-i18n="layer_zones">ফাঁক ও অঞ্চল</button>
-          <button data-layer="cone" aria-pressed="true" data-i18n="layer_cone">সম্ভাব্য সীমা</button>
-          <button data-layer="plan" aria-pressed="true" data-i18n="layer_plan">আমার পরিকল্পনা</button>
+        <div class="layers" id="layers" role="group" data-i18n-aria="layers_aria" aria-label="চার্টের লেয়ার">
+          <button data-layer="structure" aria-pressed="true" data-i18n="layer_structure">স্ট্রাকচার</button>
+          <button data-layer="liquidity" aria-pressed="true" data-i18n="layer_liquidity">লিকুইডিটি</button>
+          <button data-layer="zones" aria-pressed="true" data-i18n="layer_zones">FVG ও OB</button>
+          <button data-layer="cone" aria-pressed="true" data-i18n="layer_cone">সম্ভাব্য রেঞ্জ</button>
+          <button data-layer="plan" aria-pressed="true" data-i18n="layer_plan">আমার প্ল্যান</button>
         </div>
       </div>
       <div class="chart-bar">
         <div class="ind-menu">
           <button type="button" class="cbtn" id="ind-btn" aria-expanded="false" aria-controls="ind-pop">
-            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 15l5-6 4 4 7-9" /></svg><span data-i18n="ind">সূচক</span></button>
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 15l5-6 4 4 7-9" /></svg><span data-i18n="ind">ইন্ডিকেটর</span></button>
           <div class="ind-pop" id="ind-pop" hidden></div>
         </div>
         <span class="cbar-sep"></span>
-        <button type="button" class="cbtn" id="fit-btn"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 7V3h4M13 3h4v4M17 13v4h-4M7 17H3v-4" /></svg><span data-i18n="fit">আগের মতো</span></button>
-        <button type="button" class="cbtn" id="shot-btn"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 6h3l2-2h4l2 2h3v10H3z" /><circle cx="10" cy="11" r="3" /></svg><span data-i18n="shot">ছবি</span></button>
-        <button type="button" class="cbtn" id="max-btn" aria-pressed="false"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8 3H3v5M12 3h5v5M17 12v5h-5M3 12v5h5" /></svg><span data-i18n="max">বড় করুন</span></button>
+        <button type="button" class="cbtn" id="fit-btn"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 7V3h4M13 3h4v4M17 13v4h-4M7 17H3v-4" /></svg><span data-i18n="fit">রিসেট</span></button>
+        <button type="button" class="cbtn" id="shot-btn"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 6h3l2-2h4l2 2h3v10H3z" /><circle cx="10" cy="11" r="3" /></svg><span data-i18n="shot">স্ক্রিনশট</span></button>
+        <button type="button" class="cbtn" id="max-btn" aria-pressed="false"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8 3H3v5M12 3h5v5M17 12v5h-5M3 12v5h5" /></svg><span data-i18n="max">ফুল স্ক্রিন</span></button>
       </div>
       <div class="chart-shell">
-        <div class="draw-tools" id="draw-tools" role="toolbar" data-i18n-aria="tools_aria" aria-label="আঁকার সরঞ্জাম" aria-orientation="vertical"></div>
+        <div class="draw-tools" id="draw-tools" role="toolbar" data-i18n-aria="tools_aria" aria-label="ড্রয়িং টুল" aria-orientation="vertical"></div>
         <div class="chart-wrap" id="chart-wrap">
-          <div id="chart" class="chart" role="img" data-i18n-aria="chart_aria" aria-label="সোনা বা রুপার চার্ট, চূড়া ও তল, স্টপের জায়গা, ফাঁক ও অঞ্চল এবং আগামী ৪ ঘণ্টার সম্ভাব্য সীমা"></div>
+          <div id="chart" class="chart" role="img" data-i18n-aria="chart_aria" aria-label="সোনা বা রুপার চার্ট: মার্কেট স্ট্রাকচার, লিকুইডিটি, ফেয়ার ভ্যালু গ্যাপ, অর্ডার ব্লক এবং আগামী ৪ ঘণ্টার সম্ভাব্য রেঞ্জ"></div>
           <canvas id="overlay" class="overlay" aria-hidden="true"></canvas>
           <div id="draw-layer" class="draw-layer"></div>
           <div id="ohlc" class="ohlc" aria-live="off"></div>
@@ -108,38 +112,39 @@
           <div id="explain" class="explain" role="dialog" aria-modal="false" hidden></div>
         </div>
       </div>
-      <p class="note chart-hint" id="chart-hint" data-i18n="chart_hint">চার্টের যেকোনো দাগ, অঞ্চল বা চিহ্নে চাপুন: সেটা কী, ট্রেডাররা কেন দেখেন, আর ২৩ বছরের ডেটা কী বলে, সব লেখা আসবে। চার্টের পাশের সরঞ্জাম দিয়ে নিজের দাগ আঁকুন।</p>
+      <p class="note chart-hint" id="chart-hint" data-i18n="chart_hint">চার্টের যেকোনো লাইন, জোন বা চিহ্নে চাপুন: সেটা কী, ট্রেডাররা কেন দেখেন, আর ২৩ বছরের ডেটা কী বলে, সব লেখা আসবে। চার্টের পাশের টুলবার দিয়ে নিজের ড্রয়িং করুন।</p>
       <details class="glossary">
         <summary data-i18n="gl_summary">চার্টের চিহ্নগুলো কী বোঝায়</summary>
         <dl>
-          <div><dt data-i18n="gl_hl_t">উঁচু / নিচু</dt><dd data-i18n="gl_hl">প্রতিটি চূড়া বা তলের পাশে লেখা: আগেরটার চেয়ে উঁচু হলে সবুজ "উঁচু", নিচু হলে লাল "নিচু"। পরপর উঁচু মানে দাম উঠছে, পরপর নিচু মানে নামছে।</dd></div>
-          <div><dt data-i18n="gl_bos_t">ভাঙন</dt><dd data-i18n="gl_bos">দাম আগের চূড়ার ওপরে বা তলের নিচে বন্ধ হয়েছে। যে দিকে যাচ্ছিল, সেদিকেই চলছে। (ইংরেজিতে BOS)</dd></div>
-          <div><dt data-i18n="gl_choch_t">মোড়</dt><dd data-i18n="gl_choch">দাম এতদিন যে দিকে যাচ্ছিল, এই প্রথম উল্টো দিকে ভাঙল। দিক বদলাতে পারে। (ইংরেজিতে CHoCH)</dd></div>
-          <div><dt data-i18n="gl_liq_t"><i class="sw swliq"></i>স্টপের জায়গা</dt><dd data-i18n="gl_liq">আগের চূড়া-তল, গতকাল আর গত সপ্তাহের সবচেয়ে বেশি ও কম দাম। এখানে অনেকে স্টপ লস রাখে, তাই দাম প্রায়ই এগুলো ছুঁয়ে আসে।</dd></div>
-          <div><dt data-i18n="gl_fvg_t"><i class="sw swfvg"></i>ফাঁক</dt><dd data-i18n="gl_fvg">দাম এত দ্রুত সরেছিল যে মাঝে একটা ফাঁকা জায়গা রয়ে গেছে। দাম অনেক সময় ফিরে এসে এটা ভরে। (ইংরেজিতে FVG)</dd></div>
-          <div><dt data-i18n="gl_ob_t"><i class="sw swdem"></i>কেনার / <i class="sw swsup"></i>বেচার জায়গা</dt><dd data-i18n="gl_ob">যেখান থেকে আগে বড় কেনা বা বড় বিক্রি শুরু হয়েছিল। (ইংরেজিতে অর্ডার ব্লক)</dd></div>
-          <div><dt data-i18n="gl_pd_t">দামি / সস্তা</dt><dd data-i18n="gl_pd">সাম্প্রতিক চূড়া আর তলের ঠিক মাঝখানে একটা দাগ আছে। দাগের ওপরে দাম "দামি", নিচে "সস্তা"।</dd></div>
-          <div><dt data-i18n="gl_cone_t"><i class="sw sw80"></i>সম্ভাব্য সীমা</dt><dd data-i18n="gl_cone">হলুদ ছায়া: আগামী ৪ ঘণ্টায় দাম কোথায় থাকতে পারে। মাঝারি ছায়ার ভেতরে ১০ বারে ৮ বার, হালকা ছায়ার ভেতরে প্রায় সবসময়।</dd></div>
-          <div><dt data-i18n="gl_tf_t">৪ ঘণ্টা / ১ ঘণ্টা</dt><dd data-i18n="gl_tf">৪ ঘণ্টার চার্টে বড় ছবি দেখুন, ১ ঘণ্টার চার্টে ঢোকার সময় ঠিক করুন। ১ ঘণ্টায় স্টপ লস কাছে হয়, তাই লট বড় হয়। কিন্তু ছোট ঝাঁকুনিতেই স্টপ কেটে যাওয়ার ভয় বেশি।</dd></div>
+          <div><dt data-i18n="gl_hl_t">HH / HL / LH / LL</dt><dd data-i18n="gl_hl">প্রতিটি সুইং হাই বা সুইং লো-এর পাশে লেখা থাকে। HH = হায়ার হাই, HL = হায়ার লো (সবুজ: ক্রেতারা এগিয়ে)। LH = লোয়ার হাই, LL = লোয়ার লো (লাল: বিক্রেতারা এগিয়ে)।</dd></div>
+          <div><dt data-i18n="gl_bos_t">ব্রেক অব স্ট্রাকচার (BOS)</dt><dd data-i18n="gl_bos">দাম আগের সুইং হাইয়ের ওপরে বা সুইং লো-এর নিচে ক্লোজ করেছে, ট্রেন্ডের দিকেই। ট্রেন্ড চলছে।</dd></div>
+          <div><dt data-i18n="gl_choch_t">চেঞ্জ অব ক্যারেক্টার (CHoCH)</dt><dd data-i18n="gl_choch">এতদিনের ট্রেন্ডের উল্টো দিকে প্রথম ব্রেক। ট্রেন্ড বদলাতে পারে।</dd></div>
+          <div><dt data-i18n="gl_liq_t"><i class="sw swliq"></i>লিকুইডিটি</dt><dd data-i18n="gl_liq">আগের সুইং হাই-লো, ইকুয়াল হাই-লো, আগের দিনের (PDH / PDL) আর আগের সপ্তাহের (PWH / PWL) হাই-লো। এখানে অনেকের স্টপ লস জমে থাকে, তাই দাম প্রায়ই এগুলো ছুঁয়ে আসে (লিকুইডিটি সুইপ)।</dd></div>
+          <div><dt data-i18n="gl_fvg_t"><i class="sw swfvg"></i>ফেয়ার ভ্যালু গ্যাপ (FVG)</dt><dd data-i18n="gl_fvg">দাম এত দ্রুত সরেছিল যে তিন ক্যান্ডেলের মাঝে একটা ফাঁকা জায়গা রয়ে গেছে। দাম অনেক সময় ফিরে এসে গ্যাপটা ফিল করে।</dd></div>
+          <div><dt data-i18n="gl_ob_t"><i class="sw swdem"></i>বুলিশ / <i class="sw swsup"></i>বেয়ারিশ অর্ডার ব্লক</dt><dd data-i18n="gl_ob">যেখান থেকে আগে বড় কেনা (বুলিশ) বা বড় বিক্রি (বেয়ারিশ) শুরু হয়েছিল। দাম ফিরে এলে অনেকে এটাকে সাপোর্ট বা রেজিস্ট্যান্স হিসেবে দেখেন।</dd></div>
+          <div><dt data-i18n="gl_pd_t">প্রিমিয়াম / ডিসকাউন্ট</dt><dd data-i18n="gl_pd">সাম্প্রতিক সুইং হাই আর সুইং লো-এর ঠিক মাঝখানে (ইকুইলিব্রিয়াম, ৫০%) একটা লাইন আছে। লাইনের ওপরে প্রিমিয়াম (দামি), নিচে ডিসকাউন্ট (সস্তা)।</dd></div>
+          <div><dt data-i18n="gl_cone_t"><i class="sw sw80"></i>সম্ভাব্য রেঞ্জ</dt><dd data-i18n="gl_cone">হলুদ ছায়া: আগামী ৪ ঘণ্টায় দাম কোথায় থাকতে পারে। মাঝারি ছায়ার ভেতরে ১০ বারে ৮ বার (৮০% রেঞ্জ), হালকা ছায়ার ভেতরে প্রায় সবসময় (৯৫%)।</dd></div>
+          <div><dt data-i18n="gl_sltp_t">স্টপ লস (SL) / টেক প্রফিট (TP) / লট</dt><dd data-i18n="gl_sltp">স্টপ লস: যে দামে লস মেনে বেরিয়ে যাবেন। টেক প্রফিট: যে দামে লাভ তুলবেন। লট: ট্রেডের আকার (সোনায় ১ লট = ১০০ আউন্স, রুপায় ১ লট = ৫,০০০ আউন্স)।</dd></div>
+          <div><dt data-i18n="gl_tf_t">৪ ঘণ্টা / ১ ঘণ্টা টাইমফ্রেম</dt><dd data-i18n="gl_tf">৪ ঘণ্টার চার্টে বড় ছবি দেখুন, ১ ঘণ্টার চার্টে এন্ট্রির সময় ঠিক করুন। ১ ঘণ্টায় স্টপ লস কাছে হয়, তাই লট সাইজ বড় হয়। কিন্তু ছোট নয়েজেই স্টপ লস লেগে যাওয়ার ভয় বেশি।</dd></div>
         </dl>
       </details>
     </div>
 
     <div class="card planner" id="planner">
       <div class="card-head">
-        <h2><span data-i18n="plan_title">ট্রেড পরিকল্পনা</span> <small id="plan-sub">বাজেট আর দিক দিন, বাকিটা আমরা হিসাব করব</small></h2>
+        <h2><span data-i18n="plan_title">ট্রেড প্ল্যান</span> <small id="plan-sub">বাজেট আর দিক দিন, বাকিটা আমরা হিসাব করব</small></h2>
       </div>
       <div class="planner-grid">
         <form class="plan-form" id="plan-form" autocomplete="off" novalidate>
           <div class="seg" role="group" data-i18n-aria="side_aria" aria-label="দিক">
-            <button type="button" data-side="1" class="buy" aria-pressed="true" data-i18n="buy">কিনব (Buy)</button>
-            <button type="button" data-side="-1" class="sell" aria-pressed="false" data-i18n="sell">বেচব (Sell)</button>
+            <button type="button" data-side="1" class="buy" aria-pressed="true" data-i18n="buy">বাই (কিনব)</button>
+            <button type="button" data-side="-1" class="sell" aria-pressed="false" data-i18n="sell">সেল (বেচব)</button>
           </div>
           <label><span data-i18n="budget">বাজেট (মার্কিন ডলার)</span>
             <input id="plan-budget" type="number" inputmode="decimal" min="10" step="10" value="1000">
             <span class="field-error" id="budget-error"></span>
           </label>
-          <label><span data-i18n="risk">একটা ট্রেডে সর্বোচ্চ কত হারাতে রাজি</span>
+          <label><span data-i18n="risk">প্রতি ট্রেডে সর্বোচ্চ রিস্ক</span>
             <select id="plan-risk">
               <option value="0.005" data-i18n="risk_05">বাজেটের ০.৫% (খুব সাবধানী)</option>
               <option value="0.01" selected data-i18n="risk_1">বাজেটের ১% (ভালো অভ্যাস)</option>
@@ -147,10 +152,10 @@
               <option value="0.03" data-i18n="risk_3">বাজেটের ৩% (বেশি ঝুঁকি)</option>
             </select>
           </label>
-          <label><span data-i18n="when">কখন ঢুকবেন</span>
+          <label><span data-i18n="when">কখন এন্ট্রি নেবেন</span>
             <select id="plan-mode">
-              <option value="now" selected data-i18n="when_now">এখনই</option>
-              <option value="pullback" data-i18n="when_pull">দাম একটু ফিরে এলে</option>
+              <option value="now" selected data-i18n="when_now">এখনই (মার্কেট অর্ডার)</option>
+              <option value="pullback" data-i18n="when_pull">দাম ফিরে এলে (লিমিট অর্ডার)</option>
             </select>
           </label>
           <label><span data-i18n="leverage">লিভারেজ (ব্রোকারের সেটিং)</span>
@@ -164,28 +169,28 @@
         </form>
         <div class="plan-out" id="plan-out" aria-live="polite"></div>
       </div>
-      <p class="note" data-i18n="plan_note">কিনবেন না বেচবেন, সেটা আপনার সিদ্ধান্ত। ২৩ বছরের ডেটায় কোনো চার্ট প্যাটার্ন আগে থেকে দিক বলতে পারেনি, তাই আমরা দিক বলি না। আমরা দেখাই: কোথায় ঢুকবেন, কোথায় থামবেন, কোথায় লাভ তুলবেন, আর কত লট নিলে একটা ভুলে অ্যাকাউন্ট শেষ হবে না।</p>
+      <p class="note" data-i18n="plan_note">বাই না সেল, সেটা আপনার সিদ্ধান্ত। ২৩ বছরের ডেটায় কোনো চার্ট প্যাটার্ন আগে থেকে দিক বলতে পারেনি, তাই আমরা দিক বলি না। আমরা দেখাই: কোথায় এন্ট্রি, কোথায় স্টপ লস, কোথায় টেক প্রফিট, আর কত লট নিলে একটা ভুলে অ্যাকাউন্ট শেষ হবে না।</p>
     </div>
 
     <div class="grid3">
       <div class="card">
-        <h2 data-i18n="range_title">সম্ভাব্য পরিসর <small>আগামী ৪ ঘণ্টা</small></h2>
+        <h2 data-i18n="range_title">সম্ভাব্য রেঞ্জ <small>আগামী ৪ ঘণ্টা</small></h2>
         <table class="kv" id="range-table"><tbody></tbody></table>
       </div>
       <div class="card">
-        <h2 data-i18n="touch_title">দাম কি এই স্তর ছুঁবে?</h2>
+        <h2 data-i18n="touch_title">দাম কি এই লেভেল ছুঁবে?</h2>
         <table class="kv" id="touch-table"><tbody></tbody></table>
         <p class="note" data-i18n="touch_note">আগামী ৪ ঘণ্টায় প্রতিটি দিকে স্পর্শের সম্ভাবনা।</p>
       </div>
       <div class="card">
-        <h2 data-i18n="macro_title">বড় ছবি <small>ডলার, সুদ, বড় ফান্ড</small></h2>
+        <h2 data-i18n="macro_title">ম্যাক্রো পরিস্থিতি <small>ডলার, সুদহার, বড় ফান্ড</small></h2>
         <ul class="macro" id="macro"></ul>
         <p class="note" id="macro-note"></p>
       </div>
     </div>
 
     <div class="card">
-      <h2 data-i18n="events_title">সামনের গুরুত্বপূর্ণ খবর <small>মার্কিন, উচ্চ প্রভাব</small></h2>
+      <h2 data-i18n="events_title">সামনের হাই-ইমপ্যাক্ট নিউজ <small>মার্কিন ইকোনমিক ক্যালেন্ডার</small></h2>
       <div class="table-wrap"><table class="list" id="events"><tbody></tbody></table></div>
     </div>
   </section>
@@ -193,12 +198,12 @@
   <section id="record" class="record" data-i18n-aria="nav_record" aria-label="ট্র্যাক রেকর্ড">
     <div class="section-head">
       <h2 data-i18n="nav_record">ট্র্যাক রেকর্ড</h2>
-      <p data-i18n="record_intro">পূর্বাভাস ঠিক হলো কি না, সংখ্যায়। ৮০% পরিসর সঠিক মানে দাম আসলেই ৮০% সময় সেই পরিসরের মধ্যে ছিল। লক্ষ্য ৮০%, এর বেশি বা কম দুটোই ভুল।</p>
+      <p data-i18n="record_intro">পূর্বাভাস ঠিক হলো কি না, সংখ্যায়। ৮০% রেঞ্জ সঠিক মানে দাম আসলেই ৮০% সময় সেই রেঞ্জের মধ্যে ছিল। লক্ষ্য ৮০%, এর বেশি বা কম দুটোই ভুল।</p>
     </div>
     <div class="stats" id="stats"></div>
     <div class="card">
       <h2><span data-i18n="history_title">সাম্প্রতিক পূর্বাভাস</span> <small id="history-metal"></small></h2>
-      <div class="table-wrap"><table class="list" id="history"><thead><tr><th data-i18n="h_time">পূর্বাভাসের সময়</th><th data-i18n="h_price">তখনকার দাম</th><th data-i18n="h_band">৮০% পরিসর</th><th data-i18n="h_after">৪ ঘণ্টা পরের দাম</th><th data-i18n="h_result">ফল</th></tr></thead><tbody></tbody></table></div>
+      <div class="table-wrap"><table class="list" id="history"><thead><tr><th data-i18n="h_time">পূর্বাভাসের সময়</th><th data-i18n="h_price">তখনকার দাম</th><th data-i18n="h_band">৮০% রেঞ্জ</th><th data-i18n="h_after">৪ ঘণ্টা পরের দাম</th><th data-i18n="h_result">ফল</th></tr></thead><tbody></tbody></table></div>
     </div>
     <div class="card ledger">
       <h2 data-i18n="ledger_title">যাচাইযোগ্য লেজার</h2>
@@ -213,10 +218,10 @@
   <section id="method" class="method" data-i18n-aria="nav_method" aria-label="পদ্ধতি">
     <div class="section-head"><h2 data-i18n="nav_method">পদ্ধতি</h2></div>
     <div class="grid2">
-      <div class="card"><h3 data-i18n="m1_t">এটা কী দেখায়</h3><p data-i18n="m1">প্রতি ৪ ঘণ্টায় একটি মডেল হিসাব করে আগামী ৪ ঘণ্টায় দাম কোন পরিসরে থাকার সম্ভাবনা কতটা। মডেলটি সাম্প্রতিক ওঠানামা, দিনের কোন সময়, সোমবারের খোলা, সোনার অস্থিরতা সূচক (GVZ) এবং মার্কিন গুরুত্বপূর্ণ খবরের সময়সূচি দেখে শেখে, আর প্রতিটি ফলাফলের পর নিজেকে সংশোধন করে।</p></div>
-      <div class="card"><h3 data-i18n="m2_t">চার্ট পড়া কীভাবে হয়</h3><p data-i18n="m2">কাঠামো, স্টপের জায়গা, ফাঁক ও অঞ্চল প্রতিটি সম্পূর্ণ ক্যান্ডেলের পর স্বয়ংক্রিয়ভাবে আঁকা হয়, শুধু তখন পর্যন্ত জানা তথ্য দিয়ে। একই কোড দিয়ে ২০০৩–২০২৩ সালের প্রতিটি ঘটনা মাপা হয়েছে, এবং প্রতিটি ফলাফল একটি নিয়ন্ত্রণের (কয়েন টস বা উল্টো দিকের সমান দূরত্বের স্তর) সাথে তুলনা করা হয়েছে। ফলাফল লুকানো হয়নি: বেশিরভাগ প্যাটার্ন ৫০% এর কাছাকাছি। তারপর নিয়ম আগে থেকে প্রকাশ করে (<a href="research/PREREGISTRATION_CHART_PATTERNS.md">নিবন্ধন</a>) ২০২৪–২০২৬ সালের নতুন ডেটায় পরীক্ষা হয়েছে: কোনো প্যাটার্নই কয়েন টসকে হারাতে পারেনি।</p></div>
-      <div class="card"><h3 data-i18n="m3_t">এটা কী দেখায় না</h3><p data-i18n="m3">দাম উঠবে না নামবে, তা এটি বলে না। ২০০৩ থেকে ২০২৬ পর্যন্ত আমরা ডজনখানেক জনপ্রিয় দিকনির্দেশক কৌশল কঠোরভাবে পরীক্ষা করেছি; কোনোটিই খরচ বাদ দিয়ে কয়েন টসের চেয়ে ভালো করেনি। তাই আমরা শুধু সেটাই দেখাই যা পরীক্ষায় টিকেছে: পরিসর।</p></div>
-      <div class="card"><h3 data-i18n="m4_t">কীভাবে পরীক্ষা করা হয়েছে</h3><p data-i18n="m4">নিয়ম আগে থেকে লিখে রাখা হয়েছিল। ২০০৩–২০১৮ সালের ডেটায় মডেল বাছাই, ২০১৯–২০২৩ সালে যাচাই, আর ২০২৪–২০২৬ সালে একবারের চূড়ান্ত পরীক্ষা। দুই ধাতুই উত্তীর্ণ হয়েছে: ৮০% পরিসর ৮০.০% (সোনা) ও ৭৯.৮% (রুপা) সময় সঠিক ছিল, খবরের সময়েও ~৮২%, যেখানে প্রচলিত মডেল ৬০% এর কাছাকাছি।</p></div>
+      <div class="card"><h3 data-i18n="m1_t">এটা কী দেখায়</h3><p data-i18n="m1">প্রতি ৪ ঘণ্টায় একটি মডেল হিসাব করে আগামী ৪ ঘণ্টায় দাম কোন রেঞ্জে থাকার সম্ভাবনা কতটা। মডেলটি সাম্প্রতিক ভোলাটিলিটি, দিনের কোন সময়, সোমবারের ওপেন, সোনার ভোলাটিলিটি সূচক (GVZ) এবং মার্কিন ইকোনমিক ক্যালেন্ডার দেখে শেখে, আর প্রতিটি ফলাফলের পর নিজেকে সংশোধন করে।</p></div>
+      <div class="card"><h3 data-i18n="m2_t">চার্ট পড়া কীভাবে হয়</h3><p data-i18n="m2">মার্কেট স্ট্রাকচার, লিকুইডিটি, FVG ও অর্ডার ব্লক প্রতিটি সম্পূর্ণ ক্যান্ডেলের পর স্বয়ংক্রিয়ভাবে আঁকা হয়, শুধু তখন পর্যন্ত জানা তথ্য দিয়ে। একই কোড দিয়ে ২০০৩–২০২৩ সালের প্রতিটি ঘটনা মাপা হয়েছে, এবং প্রতিটি ফলাফল একটি নিয়ন্ত্রণের (কয়েন টস বা উল্টো দিকের সমান দূরত্বের লেভেল) সাথে তুলনা করা হয়েছে। ফলাফল লুকানো হয়নি: বেশিরভাগ প্যাটার্ন ৫০% এর কাছাকাছি। তারপর নিয়ম আগে থেকে প্রকাশ করে (<a href="research/PREREGISTRATION_CHART_PATTERNS.md">প্রি-রেজিস্ট্রেশন</a>) ২০২৪–২০২৬ সালের নতুন ডেটায় পরীক্ষা হয়েছে: কোনো প্যাটার্নই কয়েন টসকে হারাতে পারেনি।</p></div>
+      <div class="card"><h3 data-i18n="m3_t">এটা কী দেখায় না</h3><p data-i18n="m3">দাম উঠবে না নামবে, তা এটি বলে না। ২০০৩ থেকে ২০২৬ পর্যন্ত আমরা ডজনখানেক জনপ্রিয় দিকনির্দেশক কৌশল কঠোরভাবে পরীক্ষা করেছি; কোনোটিই খরচ বাদ দিয়ে কয়েন টসের চেয়ে ভালো করেনি। তাই আমরা শুধু সেটাই দেখাই যা পরীক্ষায় টিকেছে: রেঞ্জ।</p></div>
+      <div class="card"><h3 data-i18n="m4_t">কীভাবে পরীক্ষা করা হয়েছে</h3><p data-i18n="m4">নিয়ম আগে থেকে লিখে রাখা হয়েছিল। ২০০৩–২০১৮ সালের ডেটায় মডেল বাছাই, ২০১৯–২০২৩ সালে যাচাই, আর ২০২৪–২০২৬ সালে একবারের চূড়ান্ত পরীক্ষা। দুই ধাতুই উত্তীর্ণ হয়েছে: ৮০% রেঞ্জ ৮০.০% (সোনা) ও ৭৯.৮% (রুপা) সময় সঠিক ছিল, নিউজের সময়েও ~৮২%, যেখানে প্রচলিত মডেল ৬০% এর কাছাকাছি।</p></div>
       <div class="card"><h3 data-i18n="m5_t">ডেটা ও দায়</h3><p data-i18n="m5">দামের ডেটা: Dukascopy (স্পট XAU/USD, XAG/USD)। লাইভ দাম Binance-এর গোল্ড/সিলভার চুক্তি থেকে, স্পট দামে সমন্বয় করে দেখানো হয়। এটি শিক্ষামূলক বিশ্লেষণ, বিনিয়োগ পরামর্শ নয়। ট্রেডিংয়ে মূলধন হারানোর ঝুঁকি আছে।</p></div>
     </div>
   </section>
@@ -228,7 +233,11 @@
 </footer>
 
 <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
-<script src="assets/i18n.js?v=12"></script>
-<script src="assets/app.js?v=12"></script>
+<div id="alert-panel" class="alert-panel" role="dialog" aria-modal="false" aria-labelledby="alert-panel-title" hidden></div>
+<div id="alert-card" class="alert-card" role="dialog" aria-modal="true" aria-labelledby="alert-card-title" hidden></div>
+<div id="toasts" class="toasts" aria-live="polite"></div>
+
+<script src="assets/i18n.js?v=13"></script>
+<script src="assets/app.js?v=13"></script>
 </body>
 </html>
