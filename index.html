@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
-<link rel="stylesheet" href="assets/style.css?v=11">
+<link rel="stylesheet" href="assets/style.css?v=12">
 </head>
 <body>
 <header class="topbar">
@@ -86,10 +86,29 @@
           <button data-layer="plan" aria-pressed="true" data-i18n="layer_plan">আমার পরিকল্পনা</button>
         </div>
       </div>
-      <div class="chart-wrap">
-        <div id="chart" class="chart" role="img" data-i18n-aria="chart_aria" aria-label="সোনা বা রুপার চার্ট, চূড়া ও তল, স্টপের জায়গা, ফাঁক ও অঞ্চল এবং আগামী ৪ ঘণ্টার সম্ভাব্য সীমা"></div>
-        <canvas id="overlay" class="overlay" aria-hidden="true"></canvas>
+      <div class="chart-bar">
+        <div class="ind-menu">
+          <button type="button" class="cbtn" id="ind-btn" aria-expanded="false" aria-controls="ind-pop">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 15l5-6 4 4 7-9" /></svg><span data-i18n="ind">সূচক</span></button>
+          <div class="ind-pop" id="ind-pop" hidden></div>
+        </div>
+        <span class="cbar-sep"></span>
+        <button type="button" class="cbtn" id="fit-btn"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 7V3h4M13 3h4v4M17 13v4h-4M7 17H3v-4" /></svg><span data-i18n="fit">আগের মতো</span></button>
+        <button type="button" class="cbtn" id="shot-btn"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 6h3l2-2h4l2 2h3v10H3z" /><circle cx="10" cy="11" r="3" /></svg><span data-i18n="shot">ছবি</span></button>
+        <button type="button" class="cbtn" id="max-btn" aria-pressed="false"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8 3H3v5M12 3h5v5M17 12v5h-5M3 12v5h5" /></svg><span data-i18n="max">বড় করুন</span></button>
       </div>
+      <div class="chart-shell">
+        <div class="draw-tools" id="draw-tools" role="toolbar" data-i18n-aria="tools_aria" aria-label="আঁকার সরঞ্জাম" aria-orientation="vertical"></div>
+        <div class="chart-wrap" id="chart-wrap">
+          <div id="chart" class="chart" role="img" data-i18n-aria="chart_aria" aria-label="সোনা বা রুপার চার্ট, চূড়া ও তল, স্টপের জায়গা, ফাঁক ও অঞ্চল এবং আগামী ৪ ঘণ্টার সম্ভাব্য সীমা"></div>
+          <canvas id="overlay" class="overlay" aria-hidden="true"></canvas>
+          <div id="draw-layer" class="draw-layer"></div>
+          <div id="ohlc" class="ohlc" aria-live="off"></div>
+          <div id="sel-bar" class="sel-bar" hidden></div>
+          <div id="explain" class="explain" role="dialog" aria-modal="false" hidden></div>
+        </div>
+      </div>
+      <p class="note chart-hint" id="chart-hint" data-i18n="chart_hint">চার্টের যেকোনো দাগ, অঞ্চল বা চিহ্নে চাপুন: সেটা কী, ট্রেডাররা কেন দেখেন, আর ২৩ বছরের ডেটা কী বলে, সব লেখা আসবে। চার্টের পাশের সরঞ্জাম দিয়ে নিজের দাগ আঁকুন।</p>
       <details class="glossary">
         <summary data-i18n="gl_summary">চার্টের চিহ্নগুলো কী বোঝায়</summary>
         <dl>
@@ -195,7 +214,7 @@
     <div class="section-head"><h2 data-i18n="nav_method">পদ্ধতি</h2></div>
     <div class="grid2">
       <div class="card"><h3 data-i18n="m1_t">এটা কী দেখায়</h3><p data-i18n="m1">প্রতি ৪ ঘণ্টায় একটি মডেল হিসাব করে আগামী ৪ ঘণ্টায় দাম কোন পরিসরে থাকার সম্ভাবনা কতটা। মডেলটি সাম্প্রতিক ওঠানামা, দিনের কোন সময়, সোমবারের খোলা, সোনার অস্থিরতা সূচক (GVZ) এবং মার্কিন গুরুত্বপূর্ণ খবরের সময়সূচি দেখে শেখে, আর প্রতিটি ফলাফলের পর নিজেকে সংশোধন করে।</p></div>
-      <div class="card"><h3 data-i18n="m2_t">চার্ট পড়া কীভাবে হয়</h3><p data-i18n="m2">কাঠামো, স্টপের জায়গা, ফাঁক ও অঞ্চল প্রতিটি সম্পূর্ণ ক্যান্ডেলের পর স্বয়ংক্রিয়ভাবে আঁকা হয়, শুধু তখন পর্যন্ত জানা তথ্য দিয়ে। একই কোড দিয়ে ২০০৩–২০২৩ সালের প্রতিটি ঘটনা মাপা হয়েছে, এবং প্রতিটি ফলাফল একটি নিয়ন্ত্রণের (কয়েন টস বা উল্টো দিকের সমান দূরত্বের স্তর) সাথে তুলনা করা হয়েছে। ফলাফল লুকানো হয়নি: বেশিরভাগ প্যাটার্ন ৫০% এর কাছাকাছি।</p></div>
+      <div class="card"><h3 data-i18n="m2_t">চার্ট পড়া কীভাবে হয়</h3><p data-i18n="m2">কাঠামো, স্টপের জায়গা, ফাঁক ও অঞ্চল প্রতিটি সম্পূর্ণ ক্যান্ডেলের পর স্বয়ংক্রিয়ভাবে আঁকা হয়, শুধু তখন পর্যন্ত জানা তথ্য দিয়ে। একই কোড দিয়ে ২০০৩–২০২৩ সালের প্রতিটি ঘটনা মাপা হয়েছে, এবং প্রতিটি ফলাফল একটি নিয়ন্ত্রণের (কয়েন টস বা উল্টো দিকের সমান দূরত্বের স্তর) সাথে তুলনা করা হয়েছে। ফলাফল লুকানো হয়নি: বেশিরভাগ প্যাটার্ন ৫০% এর কাছাকাছি। তারপর নিয়ম আগে থেকে প্রকাশ করে (<a href="research/PREREGISTRATION_CHART_PATTERNS.md">নিবন্ধন</a>) ২০২৪–২০২৬ সালের নতুন ডেটায় পরীক্ষা হয়েছে: কোনো প্যাটার্নই কয়েন টসকে হারাতে পারেনি।</p></div>
       <div class="card"><h3 data-i18n="m3_t">এটা কী দেখায় না</h3><p data-i18n="m3">দাম উঠবে না নামবে, তা এটি বলে না। ২০০৩ থেকে ২০২৬ পর্যন্ত আমরা ডজনখানেক জনপ্রিয় দিকনির্দেশক কৌশল কঠোরভাবে পরীক্ষা করেছি; কোনোটিই খরচ বাদ দিয়ে কয়েন টসের চেয়ে ভালো করেনি। তাই আমরা শুধু সেটাই দেখাই যা পরীক্ষায় টিকেছে: পরিসর।</p></div>
       <div class="card"><h3 data-i18n="m4_t">কীভাবে পরীক্ষা করা হয়েছে</h3><p data-i18n="m4">নিয়ম আগে থেকে লিখে রাখা হয়েছিল। ২০০৩–২০১৮ সালের ডেটায় মডেল বাছাই, ২০১৯–২০২৩ সালে যাচাই, আর ২০২৪–২০২৬ সালে একবারের চূড়ান্ত পরীক্ষা। দুই ধাতুই উত্তীর্ণ হয়েছে: ৮০% পরিসর ৮০.০% (সোনা) ও ৭৯.৮% (রুপা) সময় সঠিক ছিল, খবরের সময়েও ~৮২%, যেখানে প্রচলিত মডেল ৬০% এর কাছাকাছি।</p></div>
       <div class="card"><h3 data-i18n="m5_t">ডেটা ও দায়</h3><p data-i18n="m5">দামের ডেটা: Dukascopy (স্পট XAU/USD, XAG/USD)। লাইভ দাম Binance-এর গোল্ড/সিলভার চুক্তি থেকে, স্পট দামে সমন্বয় করে দেখানো হয়। এটি শিক্ষামূলক বিশ্লেষণ, বিনিয়োগ পরামর্শ নয়। ট্রেডিংয়ে মূলধন হারানোর ঝুঁকি আছে।</p></div>
@@ -209,7 +228,7 @@
 </footer>
 
 <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
-<script src="assets/i18n.js?v=11"></script>
-<script src="assets/app.js?v=11"></script>
+<script src="assets/i18n.js?v=12"></script>
+<script src="assets/app.js?v=12"></script>
 </body>
 </html>
