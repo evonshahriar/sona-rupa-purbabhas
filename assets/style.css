@@ -94,6 +94,8 @@ table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nu
 .list td { padding: 8px; border-bottom: 1px solid var(--line); font-size: 0.92rem; white-space: nowrap; }
 .list tr:last-child td { border-bottom: 0; }
 .list td.num { font-family: var(--mono); font-size: 0.88rem; }
+#events td:first-child { white-space: normal; min-width: 9rem; }
+@media (max-width: 640px) { #events td.note { white-space: normal; } }
 .table-wrap { overflow-x: auto; }
 .tag { display: inline-block; font-size: 0.75rem; font-weight: 600; padding: 1px 8px; border-radius: 999px; background: var(--soft); }
 .tag.hit { color: var(--up); } .tag.miss { color: var(--down); } .tag.wait { color: var(--muted); }
