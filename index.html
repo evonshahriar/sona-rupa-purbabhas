@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
-<link rel="stylesheet" href="assets/style.css?v=6">
+<link rel="stylesheet" href="assets/style.css?v=7">
 </head>
 <body>
 <header class="topbar">
@@ -55,7 +55,13 @@
 
     <div class="card chart-card">
       <div class="card-head">
-        <h2>চার্ট <small>৪ ঘণ্টার ক্যান্ডেল</small></h2>
+        <div class="chart-title">
+          <h2>চার্ট <small id="chart-sub">৪ ঘণ্টার ক্যান্ডেল</small></h2>
+          <div class="tf-switch" id="tf-switch" role="tablist" aria-label="টাইমফ্রেম">
+            <button role="tab" data-tf="4h" aria-selected="true">৪ ঘণ্টা</button>
+            <button role="tab" data-tf="1h" aria-selected="false">১ ঘণ্টা</button>
+          </div>
+        </div>
         <div class="layers" id="layers" role="group" aria-label="চার্টের স্তর">
           <button data-layer="structure" aria-pressed="true">কাঠামো</button>
           <button data-layer="liquidity" aria-pressed="true">স্টপের জায়গা</button>
@@ -73,6 +79,7 @@
         <dl>
           <div><dt>HH / HL</dt><dd>আগের চেয়ে উঁচু চূড়া / উঁচু তল: ক্রেতারা নিয়ন্ত্রণে।</dd></div>
           <div><dt>LH / LL</dt><dd>আগের চেয়ে নিচু চূড়া / নিচু তল: বিক্রেতারা নিয়ন্ত্রণে।</dd></div>
+          <div><dt>৪ ঘণ্টা / ১ ঘণ্টা</dt><dd>৪ ঘণ্টার চার্টে বড় ছবি ও প্রবণতা দেখুন; ১ ঘণ্টার চার্টে এন্ট্রির সময় ঠিক করুন। ১ ঘণ্টায় স্টপ ছোট হয়, তাই একই ঝুঁকিতে লট বড় হয়, কিন্তু ছোট ঝাঁকুনিতে স্টপ লাগার সম্ভাবনাও বাড়ে।</dd></div>
           <div><dt>BOS</dt><dd>কাঠামো ভাঙা: দাম আগের চূড়া বা তলের ওপারে বন্ধ হয়েছে, প্রবণতা চলছে।</dd></div>
           <div><dt>CHoCH</dt><dd>চরিত্র বদল: প্রবণতার বিপরীতে প্রথম ভাঙন, সম্ভাব্য মোড় ঘোরা।</dd></div>
           <div><dt><i class="sw swliq"></i>স্টপের জায়গা</dt><dd>আগের চূড়া/তল, সমান চূড়া/তল, গতকাল ও গত সপ্তাহের উচ্চ-নিম্ন। এখানে অনেকের স্টপ লস থাকে, তাই বড় খেলোয়াড়রা প্রায়ই এগুলো ছুঁয়ে যায়।</dd></div>
@@ -86,7 +93,7 @@
 
     <div class="card planner" id="planner">
       <div class="card-head">
-        <h2>ট্রেড পরিকল্পনা <small>আপনার বাজেট ও দিক দিন, বাকিটা চার্ট থেকে</small></h2>
+        <h2>ট্রেড পরিকল্পনা <small id="plan-sub">আপনার বাজেট ও দিক দিন, বাকিটা চার্ট থেকে</small></h2>
       </div>
       <div class="planner-grid">
         <form class="plan-form" id="plan-form" autocomplete="off" novalidate>
@@ -187,6 +194,6 @@
 </footer>
 
 <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
-<script src="assets/app.js?v=6"></script>
+<script src="assets/app.js?v=7"></script>
 </body>
 </html>

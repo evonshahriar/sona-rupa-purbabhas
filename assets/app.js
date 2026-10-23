@@ -7,6 +7,7 @@
   const FEED = { XAUUSDT: "gold", XAGUSDT: "silver" };
   const TZ = "Asia/Dhaka";
   const LAYERS = ["structure", "liquidity", "zones", "cone", "plan"];
+  const TF = { "4h": { hours: 4, bn: "৪ ঘণ্টা", of: "৪ ঘণ্টার", shown: [60, 30], timeStop: 24 }, "1h": { hours: 1, bn: "১ ঘণ্টা", of: "১ ঘণ্টার", shown: [96, 48], timeStop: 8 } };
   const fmtInt = new Intl.NumberFormat("bn-BD");
   const fmtPct1 = new Intl.NumberFormat("bn-BD", { style: "percent", minimumFractionDigits: 1, maximumFractionDigits: 1 });
   const fmtPct0 = new Intl.NumberFormat("bn-BD", { style: "percent", maximumFractionDigits: 0 });
@@ -19,7 +20,7 @@
   const fmtDec = {};
 
   const state = {
-    data: null, metal: "gold", live: { gold: null, silver: null }, wsFailures: 0, polling: null, chart: null,
+    data: null, metal: "gold", tf: "4h", live: { gold: null, silver: null }, wsFailures: 0, polling: null, chart: null,
     layers: Object.fromEntries(LAYERS.map((k) => [k, true])),
     plan: { side: 1, budget: 1000, risk: 0.01, mode: "now", lev: 100 },
     planResult: null, planLines: [], lastPlanAt: 0,
@@ -76,6 +77,9 @@
   }
 
   function metalData() { return state.data && state.data.metals[state.metal]; }
+  // Layers (structure, zones, swing liquidity) of the timeframe on screen.
+  function L(m) { return m.read.tf[state.tf]; }
+  function reality(m) { return (m.reality && m.reality[state.tf]) || {}; }
   function currentPrice() {
     const m = metalData();
     const tick = state.live[state.metal];
@@ -98,8 +102,8 @@
 
   // Merge levels closer than 5% of an ATR (e.g. yesterday's low that is also last week's low).
   function pools(m, includeSwept = false) {
-    const r = m.read, tol = 0.05 * r.atr_4h;
-    const list = r.pools.filter((p) => includeSwept || !p.swept).map((p) => ({ ...p, names: [poolName(p)] })).sort((a, b) => a.price - b.price);
+    const lay = L(m), tol = 0.05 * lay.atr;
+    const list = [...lay.pools, ...m.read.levels].filter((p) => includeSwept || !p.swept).map((p) => ({ ...p, names: [poolName(p)] })).sort((a, b) => a.price - b.price);
     const out = [];
     for (const p of list) {
       const prev = out[out.length - 1];
@@ -121,7 +125,7 @@
   }
 
   function nearestZones(m, price, n = 2) {
-    const zs = m.read.zones;
+    const zs = L(m).zones;
     return {
       above: zs.filter((z) => z.bottom > price).sort((a, b) => a.bottom - b.bottom).slice(0, n),
       below: zs.filter((z) => z.top < price).sort((a, b) => b.top - a.top).slice(0, n),
@@ -134,14 +138,14 @@
   // History pill: 2003-2023 base rate of the pattern next to its control.
   function hist(key, mode = "race") {
     const m = metalData();
-    const r = m.reality && m.reality[key];
+    const r = reality(m)[key];
     if (!r || r.rate === null || r.rate === undefined) return "";
     if (mode === "race") {
       // Highlight only when both the 2003-2018 and the 2019-2023 halves sit at least 3 points from a coin flip, same side.
       const edge = Math.min(Math.abs(r.dev - 0.5), Math.abs(r.val - 0.5)) >= 0.03 && Math.sign(r.dev - 0.5) === Math.sign(r.val - 0.5);
       return `<span class="hist${edge ? " edge" : ""}" title="২০০৩–২০২৩, ${fmtInt.format(r.n)}টি ঘটনা">ইতিহাসে ${pct(r.rate, 0)} · কয়েন টস ৫০%</span>`;
     }
-    const c = m.reality[`${key}_control`];
+    const c = reality(m)[`${key}_control`];
     return `<span class="hist" title="২০০৩–২০২৩, ${fmtInt.format(r.n)}টি ঘটনা">ছুঁয়েছে ${pct(r.rate, 0)} · উল্টো দিকে ${pct(c.rate, 0)}</span>`;
   }
 
@@ -151,7 +155,7 @@
     const el = $("chart");
     let range = null;
     if (state.chart) {
-      if (state.chartMetal === state.metal) range = state.chart.timeScale().getVisibleLogicalRange();
+      if (state.chartKey === `${state.metal}:${state.tf}`) range = state.chart.timeScale().getVisibleLogicalRange();
       state.chart.remove(); state.chart = null;
     }
     if (!m || typeof LightweightCharts === "undefined") return;
@@ -181,15 +185,17 @@
         return { priceRange: { minValue: Math.min(res.priceRange.minValue, ...levels), maxValue: Math.max(res.priceRange.maxValue, ...levels) }, margins: res.margins };
       },
     });
-    candles.setData(m.bars.map((b) => ({ time: b.time, open: b.open, high: b.high, low: b.low, close: b.close })));
+    const bars = chartBars(m);
+    candles.setData(bars.map((b) => ({ time: b.time, open: b.open, high: b.high, low: b.low, close: b.close })));
     state.chart = chart;
-    state.chartMetal = state.metal;
+    state.chartKey = `${state.metal}:${state.tf}`;
     state.candles = candles;
     state.planLines = [];
-    state.formingBar = m.bars.length && !m.bars[m.bars.length - 1].complete ? { ...m.bars[m.bars.length - 1] } : null;
+    state.formingBar = bars.length && !bars[bars.length - 1].complete ? { ...bars[bars.length - 1] } : null;
+    state.lastBarTime = bars.length ? bars[bars.length - 1].time : 0;
 
     if (state.layers.structure && m.read) {
-      const markers = m.read.swings.map((s) => ({
+      const markers = L(m).swings.map((s) => ({
         time: s.time, position: s.kind === "high" ? "aboveBar" : "belowBar", shape: "circle", size: 0.4,
         color: (s.label === "HH" || s.label === "HL") ? css("--up") : css("--down"), text: s.label,
       })).sort((a, b) => a.time - b.time);
@@ -213,8 +219,8 @@
         s.setData(edge(key));
       }
     }
-    const shown = window.matchMedia("(max-width: 640px)").matches ? 30 : 60;
-    const n = m.bars.length;
+    const shown = TF[state.tf].shown[window.matchMedia("(max-width: 640px)").matches ? 1 : 0];
+    const n = bars.length;
     chart.timeScale().setVisibleLogicalRange(range || { from: Math.max(0, n - shown), to: n + 5 });
     chart.timeScale().subscribeVisibleLogicalRangeChange(() => requestDraw());
     applyLiveToChart();
@@ -222,12 +228,26 @@
     requestDraw();
   }
 
+  function chartBars(m) { return state.tf === "4h" ? m.bars : L(m).bars; }
+
   function applyLiveToChart() {
     const tick = state.live[state.metal];
-    const bar = state.formingBar;
-    if (!tick || !bar || !state.candles) return;
+    const m = metalData();
+    if (!tick || !state.candles || !m) return;
     const now = Date.now() / 1000;
-    if (now >= bar.time + 4 * 3600) return;           // the forming bar has ended; wait for the next data refresh
+    if (state.tf === "1h") {
+      // Hourly files are published after each hour: build the current hour from live ticks while the market is
+      // open (Dukascopy data fresher than 3 hours; the exchange feed also trades at weekends, which is not spot).
+      const hourStart = Math.floor(now / 3600) * 3600;
+      const fresh = Date.now() - new Date(m.data_until).getTime() < 3 * 3600e3;
+      if (fresh && hourStart > state.lastBarTime && (!state.formingBar || state.formingBar.time !== hourStart)) {
+        state.formingBar = { time: hourStart, open: tick.price, high: tick.price, low: tick.price, close: tick.price };
+        state.lastBarTime = hourStart;
+      }
+    }
+    const bar = state.formingBar;
+    if (!bar) return;
+    if (now >= bar.time + TF[state.tf].hours * 3600) return;   // the forming bar has ended; wait for the next data refresh
     bar.high = Math.max(bar.high, tick.price);
     bar.low = Math.min(bar.low, tick.price);
     bar.close = tick.price;
@@ -300,7 +320,7 @@
         ctx.fillRect(x1, Math.min(y1, y2), plotW - x1, Math.max(2, Math.abs(y2 - y1)));
         label(zone.kind === "fvg" ? "FVG" : zone.direction > 0 ? "চাহিদা" : "সরবরাহ", x1 + 4, Math.min(y1, y2) + 12, `rgba(${rgb}, 1)`);
       }
-      const r = m.read.range;
+      const r = L(m).range;
       if (r) {
         const y = Y(r.mid);
         if (y !== null) {
@@ -332,7 +352,7 @@
     }
 
     if (state.layers.structure) {
-      for (const b of m.read.breaks.slice(-3)) {
+      for (const b of L(m).breaks.slice(-3)) {
         const x1 = X(b.from), x2 = X(b.time), y = Y(b.level);
         if (x1 === null || x2 === null || y === null) continue;
         const color = b.direction > 0 ? css("--up") : css("--down");
@@ -344,8 +364,7 @@
 
     const p = state.planResult;
     if (state.layers.plan && p && p.ok) {
-      const last = m.bars[m.bars.length - 1];
-      const xl = X(last.time);
+      const xl = X(state.lastBarTime);
       const x0 = Math.max(0, (xl === null ? plotW - 60 : xl) + 6);
       const ye = Y(p.entry), ys = Y(p.sl), yt = Y((p.tp2 || p.tp1).price), yt1 = Y(p.tp1.price);
       if (ye !== null && ys !== null && yt !== null) {
@@ -377,18 +396,19 @@
     else if (keys.every((k) => k === "down")) items.push(["down", "তিনটি টাইমফ্রেমেই কাঠামো নিম্নমুখী: নিচু চূড়া ও নিচু তল তৈরি হচ্ছে, বিক্রেতারা নিয়ন্ত্রণে।", hist("race_trend_aligned")]);
     else items.push(["", `টাইমফ্রেমগুলো একমত নয় (দৈনিক ${r.trend["1d"].bn}, ৪ ঘণ্টা ${r.trend["4h"].bn}, ১ ঘণ্টা ${r.trend["1h"].bn})। এমন সময়ে দাম প্রায়ই দুই দিকেই ঝাঁকুনি দেয়।`, ""]);
 
-    const lb = r.trend["4h"].last_break;
+    const lb = r.trend[state.tf].last_break;
     if (lb) {
       const up = lb.direction > 0;
       const what = lb.kind === "BOS" ? "কাঠামো ভেঙেছে (BOS): চলমান প্রবণতা আরও এগিয়েছে" : "চরিত্র বদল (CHoCH): আগের প্রবণতার বিপরীতে প্রথম ভাঙন";
-      items.push([up ? "up" : "down", `${esc(fmtDateTime.format(new Date(lb.time * 1000)))}-এর ক্যান্ডেল <b>${money(lb.level, metal)}</b> এর ${up ? "উপরে" : "নিচে"} বন্ধ হয়ে ${what}।`,
+      items.push([up ? "up" : "down", `${TF[state.tf].of} চার্টে ${esc(fmtDateTime.format(new Date(lb.time * 1000)))}-এর ক্যান্ডেল <b>${money(lb.level, metal)}</b> এর ${up ? "উপরে" : "নিচে"} বন্ধ হয়ে ${what}।`,
         hist(lb.kind === "BOS" ? "race_bos" : "race_choch")]);
     }
-    if (r.range) {
-      const pos = (price - r.range.low) / (r.range.high - r.range.low);
+    const rg = L(m).range;
+    if (rg) {
+      const pos = (price - rg.low) / (rg.high - rg.low);
       const where = pos > 1 ? "পরিসরের উপরে বেরিয়ে গেছে" : pos < 0 ? "পরিসরের নিচে বেরিয়ে গেছে"
         : pos >= 0.5 ? "উপরের অর্ধেকে, অর্থাৎ প্রিমিয়ামে (কেনার জন্য দামি, বেচার জন্য ভালো জায়গা)" : "নিচের অর্ধেকে, অর্থাৎ ডিসকাউন্টে (কেনার জন্য সস্তা, বেচার জন্য খারাপ জায়গা)";
-      items.push(["gold", `দাম সাম্প্রতিক পরিসরের (<b>${money(r.range.low, metal)}</b> – <b>${money(r.range.high, metal)}</b>) ${where}।`, hist("race_discount_premium")]);
+      items.push(["gold", `দাম ${TF[state.tf].of} সাম্প্রতিক পরিসরের (<b>${money(rg.low, metal)}</b> – <b>${money(rg.high, metal)}</b>) ${where}।`, hist("race_discount_premium")]);
     }
     const near = nearestPools(m, price, 1);
     const poolKey = (p) => p.kind === "equal" ? "magnet_equal_levels" : p.kind === "pdh" ? "magnet_pdh" : p.kind === "pdl" ? "magnet_pdl" : null;
@@ -434,13 +454,13 @@
   function computePlan() {
     const m = metalData();
     if (!m || !m.read) return { ok: false, why: "চার্টের তথ্য এখনও তৈরি হয়নি।" };
-    const P = state.plan, metal = state.metal, r = m.read, f = m.forecast && forecastFresh(m.forecast) ? m.forecast : null;
-    const side = P.side, long = side > 0, atrv = r.atr_4h, spread = r.spread_typical || 0;
+    const P = state.plan, metal = state.metal, r = m.read, lay = L(m), f = m.forecast && forecastFresh(m.forecast) ? m.forecast : null;
+    const side = P.side, long = side > 0, atrv = lay.atr, spread = r.spread_typical || 0, tfInfo = TF[state.tf];
     const price = currentPrice();
     const buf = Math.max(0.25 * atrv, 3 * spread);
     let entry = price, mode = "now", zone = null, entryWhy = "এখনকার বাজার দামে";
     if (P.mode === "pullback") {
-      const zs = r.zones.filter((z) => z.direction === side && (long ? z.top < price : z.bottom > price) && Math.abs((long ? z.top : z.bottom) - price) <= 3 * atrv)
+      const zs = lay.zones.filter((z) => z.direction === side && (long ? z.top < price : z.bottom > price) && Math.abs((long ? z.top : z.bottom) - price) <= 3 * atrv)
         .sort((a, b) => long ? b.top - a.top : a.bottom - b.bottom);
       if (zs.length) {
         zone = zs[0]; mode = "pullback"; entry = long ? zone.top : zone.bottom;
@@ -448,9 +468,9 @@
       } else entryWhy = "কাছে কোনো উপযুক্ত অঞ্চল নেই, তাই বাজার দামে";
     }
     // Stop: beyond the swing that protects the idea, with a buffer; never inside normal 4h noise.
-    const guard = r.swings.filter((s) => s.kind === (long ? "low" : "high") && (long ? s.price < entry : s.price > entry)).sort((a, b) => b.time - a.time)[0];
+    const guard = lay.swings.filter((s) => s.kind === (long ? "low" : "high") && (long ? s.price < entry : s.price > entry)).sort((a, b) => b.time - a.time)[0];
     let sl, slWhy;
-    if (guard) { sl = guard.price - side * buf; slWhy = `সর্বশেষ ${guard.label} (${money(guard.price, metal)}) এর ${long ? "নিচে" : "উপরে"}, একটু ফাঁক রেখে`; }
+    if (guard) { sl = guard.price - side * buf; slWhy = `${tfInfo.of} সর্বশেষ ${guard.label} (${money(guard.price, metal)}) এর ${long ? "নিচে" : "উপরে"}, একটু ফাঁক রেখে`; }
     else { sl = entry - side * 1.5 * atrv; slWhy = "কাছে কোনো কাঠামো নেই, তাই ১.৫ গুণ ATR দূরে"; }
     if (zone) {
       const beyond = long ? zone.bottom - buf : zone.top + buf;
@@ -458,9 +478,10 @@
     }
     let widened = false;
     if (f) {
-      const noise = entry * Math.exp(long ? f.quantiles_return.q100 : f.quantiles_return.q900);
+      // The cone is for 4 hours; on the 1h chart its edge is scaled to one hour (square-root of time, as drawn).
+      const noise = entry * Math.exp((long ? f.quantiles_return.q100 : f.quantiles_return.q900) * Math.sqrt(tfInfo.hours / 4));
       const limit = noise - side * buf;
-      if (long ? sl > limit : sl < limit) { sl = limit; widened = true; slWhy += "; স্বাভাবিক ৪ ঘণ্টার ওঠানামার বাইরে সরানো হয়েছে"; }
+      if (long ? sl > limit : sl < limit) { sl = limit; widened = true; slWhy += `; স্বাভাবিক ${tfInfo.bn}র ওঠানামার বাইরে সরানো হয়েছে`; }
     }
     const risk = Math.abs(entry - sl);
     if (!(risk > 0)) return { ok: false, why: "স্টপ হিসাব করা যায়নি।" };
@@ -468,8 +489,12 @@
     // Targets: resting liquidity and opposing zones on the profit side, taken slightly before the level.
     const cands = [];
     for (const p of pools(m)) if (long ? p.price > entry : p.price < entry) cands.push({ level: p.price, why: `${p.names.join(" ও ")}: স্টপ জমে আছে` });
-    for (const z of r.zones) if (z.direction === -side && (long ? z.bottom > entry : z.top < entry)) cands.push({ level: long ? z.bottom : z.top, why: `${zoneName(z)} শুরু` });
-    if (r.range) { const lv = long ? r.range.high : r.range.low; if (long ? lv > entry : lv < entry) cands.push({ level: lv, why: "সাম্প্রতিক পরিসরের প্রান্ত" }); }
+    if (state.tf === "1h") {
+      // Higher-timeframe liquidity is a natural target for an entry timed on the 1h chart.
+      for (const p of r.tf["4h"].pools) if (long ? p.price > entry : p.price < entry) cands.push({ level: p.price, why: `৪ ঘণ্টার ${poolName(p)}: স্টপ জমে আছে` });
+    }
+    for (const z of lay.zones) if (z.direction === -side && (long ? z.bottom > entry : z.top < entry)) cands.push({ level: long ? z.bottom : z.top, why: `${zoneName(z)} শুরু` });
+    if (lay.range) { const lv = long ? lay.range.high : lay.range.low; if (long ? lv > entry : lv < entry) cands.push({ level: lv, why: "সাম্প্রতিক পরিসরের প্রান্ত" }); }
     for (const lv of r.round_levels) if (long ? lv > entry : lv < entry) cands.push({ level: lv, why: "রাউন্ড নম্বর" });
     cands.sort((a, b) => side * (a.level - b.level));
     const merged = [];
@@ -499,17 +524,17 @@
 
     // Checklist: risk-control rules decide the verdict; chart-context items are shown with their history.
     const checks = [];
-    const t4 = r.trend["4h"].key, td = r.trend["1d"].key, want = long ? "up" : "down", against = long ? "down" : "up";
-    if (t4 === want && td === want) checks.push(["in", "✓", "৪ ঘণ্টা ও দৈনিক প্রবণতার সাথে", hist("race_trend_aligned")]);
-    else if (t4 === against && td === against) checks.push(["wa", "!", "৪ ঘণ্টা ও দৈনিক প্রবণতার বিপরীতে: পাল্টা ট্রেড, তাই লক্ষ্য কাছে রাখুন", hist("race_trend_aligned")]);
+    const t4 = r.trend[state.tf].key, td = r.trend["1d"].key, want = long ? "up" : "down", against = long ? "down" : "up";
+    if (t4 === want && td === want) checks.push(["in", "✓", `${tfInfo.bn} ও দৈনিক প্রবণতার সাথে`, hist("race_trend_aligned")]);
+    else if (t4 === against && td === against) checks.push(["wa", "!", `${tfInfo.bn} ও দৈনিক প্রবণতার বিপরীতে: পাল্টা ট্রেড, তাই লক্ষ্য কাছে রাখুন`, hist("race_trend_aligned")]);
     else checks.push(["in", "·", "প্রবণতা মিশ্র", ""]);
-    if (r.range) {
-      const pos = (entry - r.range.low) / (r.range.high - r.range.low);
+    if (lay.range) {
+      const pos = (entry - lay.range.low) / (lay.range.high - lay.range.low);
       const good = long ? pos < 0.5 : pos > 0.5;
       checks.push(["in", good ? "✓" : "·", good ? (long ? "ডিসকাউন্টে কিনছেন (সস্তা জায়গা)" : "প্রিমিয়ামে বেচছেন (দামি জায়গা)") : (long ? "প্রিমিয়ামে কিনছেন (দামি জায়গা)" : "ডিসকাউন্টে বেচছেন (সস্তা জায়গা)"), hist("race_discount_premium")]);
     }
     checks.push(widened ? ["ok", "✓", "কাঠামোর স্টপ স্বাভাবিক ওঠানামার ভেতরে ছিল, তাই নিরাপদ দূরত্বে সরানো হয়েছে", ""]
-      : ["ok", "✓", f ? "স্টপ স্বাভাবিক ৪ ঘণ্টার ওঠানামার বাইরে" : "স্টপ কাঠামোর ওপারে", ""]);
+      : ["ok", "✓", f ? `স্টপ স্বাভাবিক ${tfInfo.bn}র ওঠানামার বাইরে` : "স্টপ কাঠামোর ওপারে", ""]);
     checks.push(tp1.r >= 1.5 ? ["ok", "✓", `ঝুঁকি:লাভ ১:${fmtR.format(tp1.r)} (TP1)`, ""] : tp1.r >= 1 ? ["wa", "!", `ঝুঁকি:লাভ মাত্র ১:${fmtR.format(tp1.r)}`, ""] : ["no", "✗", `ঝুঁকি:লাভ ১:${fmtR.format(tp1.r)}, লাভের চেয়ে ঝুঁকি বেশি`, ""]);
     const ev = (state.data.events || []).find((e) => new Date(e.time_utc).getTime() > Date.now());
     const evIn = ev ? new Date(ev.time_utc).getTime() - Date.now() : Infinity;
@@ -542,14 +567,14 @@
     const lvl = (cls, k, price, s) => `<div class="lvl ${cls}"><div class="k">${k}</div><div class="p">${money(price, metal)}</div><div class="s">${esc(s)}</div></div>`;
     const half = p.lots >= 0.02;
     const halfLots = Math.floor(p.lots * 50 + 1e-9) / 100;
-    const calib = metalData().reality.planner_tp2_sl1;
+    const calib = reality(metalData()).planner_tp2_sl1;
     const steps = [
       `${p.mode === "pullback" ? "লিমিট অর্ডারে" : "বাজার দামে"} ${sideWord}: <b>${money(p.entry, metal)}</b>, <b>${fmtLot.format(p.lots)}</b> লট।`,
       `স্টপ লস <b>${money(p.sl, metal)}</b> এ সাথে সাথে বসান। লোকসান বাড়লে স্টপ কখনো দূরে সরাবেন না।`,
       half ? `TP1 <b>${money(p.tp1.price, metal)}</b> এ <b>${fmtLot.format(halfLots)}</b> লট বন্ধ করুন এবং স্টপ এন্ট্রিতে আনুন: বাকি ট্রেড তখন ঝুঁকিমুক্ত।`
         : `TP1 <b>${money(p.tp1.price, metal)}</b> এ পুরো ট্রেড বন্ধ করুন (লট ছোট, ভাগ করা যায় না)।`,
       p.tp2 && half ? `বাকি অংশ TP2 <b>${money(p.tp2.price, metal)}</b> এ, অথবা প্রতিটি নতুন ${p.side > 0 ? "উঁচু তলের নিচে" : "নিচু চূড়ার উপরে"} স্টপ টেনে আনুন।` : null,
-      "২৪ ঘণ্টায় কোনোটি না হলে বা কাঠামো উল্টে গেলে (বিপরীত CHoCH) ট্রেড আবার বিবেচনা করুন।",
+      `${bn(TF[state.tf].timeStop)} ঘণ্টায় কোনোটি না হলে বা ${TF[state.tf].of} কাঠামো উল্টে গেলে (বিপরীত CHoCH) ট্রেড আবার বিবেচনা করুন।`,
       p.event ? `${esc(p.event.name)} (${esc(fmtDateTime.format(new Date(p.event.time_utc)))}) এর আগে লাভ তুলুন বা স্টপ এন্ট্রিতে আনুন।` : null,
     ].filter(Boolean);
     out.innerHTML = `
@@ -599,6 +624,24 @@
     $("plan-budget").addEventListener("input", changed);
     for (const id of ["plan-risk", "plan-mode", "plan-lev"]) $(id).addEventListener("change", changed);
     form.addEventListener("submit", (e) => e.preventDefault());
+  }
+
+  function bindTimeframe() {
+    const saved = restore("srp-tf");
+    if (saved && TF[saved]) state.tf = saved;
+    const sync = () => {
+      for (const b of document.querySelectorAll("#tf-switch button")) b.setAttribute("aria-selected", String(b.dataset.tf === state.tf));
+      $("chart-sub").textContent = `${TF[state.tf].of} ক্যান্ডেল`;
+      $("plan-sub").textContent = `আপনার বাজেট ও দিক দিন; স্টপ ও লক্ষ্য ${TF[state.tf].of} চার্টের কাঠামো থেকে`;
+    };
+    sync();
+    for (const b of document.querySelectorAll("#tf-switch button")) b.addEventListener("click", () => {
+      if (state.tf === b.dataset.tf) return;
+      state.tf = b.dataset.tf;
+      store("srp-tf", state.tf);
+      sync();
+      if (state.data) { renderStory(); renderPlanner(true); buildChart(); }
+    });
   }
 
   function bindLayers() {
@@ -851,6 +894,7 @@
   for (const btn of document.querySelectorAll(".switch button")) btn.addEventListener("click", () => selectMetal(btn.dataset.metal));
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => buildChart());
   new ResizeObserver(() => requestDraw()).observe($("chart"));
+  bindTimeframe();
   bindLayers();
   bindPlanner();
   tickClock();
