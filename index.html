@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>সোনা-রুপা পূর্বাভাস</title>
-<meta name="description" content="সোনা ও রুপার আগামী ৪ ঘণ্টার মূল্য পরিসরের পরীক্ষিত পূর্বাভাস। প্রতিটি পূর্বাভাস ফলাফলের আগে প্রকাশিত ও যাচাইযোগ্য।">
+<meta name="description" content="সোনা ও রুপার চার্ট অভিজ্ঞ ট্রেডারের চোখে: কাঠামো, স্টপের জায়গা, অঞ্চল, ট্রেড পরিকল্পনা ও আগামী ৪ ঘণ্টার পরীক্ষিত মূল্য পরিসর। প্রতিটি পূর্বাভাস ফলাফলের আগে প্রকাশিত ও যাচাইযোগ্য।">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
-<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/style.css?v=6">
 </head>
 <body>
 <header class="topbar">
@@ -44,20 +44,91 @@
       </div>
     </div>
 
+    <div class="card read-card">
+      <div class="card-head">
+        <h2>বাজার পড়া <small>একজন অভিজ্ঞ ট্রেডারের চোখে, প্রতি ঘণ্টায় হালনাগাদ</small></h2>
+        <div class="mtf" id="mtf"></div>
+      </div>
+      <ul class="story" id="story"></ul>
+      <p class="note">প্রতিটি লাইনের পাশে লেখা আছে ২০০৩–২০২৩ সালে এই ধরনের পরিস্থিতি কতবার কাজ করেছে। কয়েন টসে ৫০%। ৫০% এর কাছাকাছি মানে প্যাটার্নটি দিক বলে না, শুধু মানচিত্র দেখায়।</p>
+    </div>
+
     <div class="card chart-card">
       <div class="card-head">
-        <h2>চার্ট <small>৪ ঘণ্টার ক্যান্ডেল · সামনের পরিসর</small></h2>
-        <div class="legend">
-          <span><i class="sw sw50"></i>৫০%</span><span><i class="sw sw80"></i>৮০%</span><span><i class="sw sw95"></i>৯৫%</span>
+        <h2>চার্ট <small>৪ ঘণ্টার ক্যান্ডেল</small></h2>
+        <div class="layers" id="layers" role="group" aria-label="চার্টের স্তর">
+          <button data-layer="structure" aria-pressed="true">কাঠামো</button>
+          <button data-layer="liquidity" aria-pressed="true">স্টপের জায়গা</button>
+          <button data-layer="zones" aria-pressed="true">ফাঁক ও অঞ্চল</button>
+          <button data-layer="cone" aria-pressed="true">৪ ঘণ্টার পরিসর</button>
+          <button data-layer="plan" aria-pressed="true">আমার পরিকল্পনা</button>
         </div>
       </div>
-      <div id="chart" class="chart" role="img" aria-label="সোনা বা রুপার ৪ ঘণ্টার চার্ট এবং আগামী ৪ ঘণ্টার সম্ভাব্য পরিসর"></div>
-      <p class="note">ছায়াযুক্ত অংশটি দাম কোথায় থাকতে পারে তার পরিসর, দিক নয়। গাঢ় অংশে থাকার সম্ভাবনা ৫০%, মাঝারি অংশ পর্যন্ত ৮০%, হালকা অংশ পর্যন্ত ৯৫%।</p>
+      <div class="chart-wrap">
+        <div id="chart" class="chart" role="img" aria-label="সোনা বা রুপার ৪ ঘণ্টার চার্ট, বাজারের কাঠামো, স্টপের জায়গা, ফাঁক ও অঞ্চল এবং আগামী ৪ ঘণ্টার সম্ভাব্য পরিসর"></div>
+        <canvas id="overlay" class="overlay" aria-hidden="true"></canvas>
+      </div>
+      <details class="glossary">
+        <summary>চার্টের চিহ্নগুলো কী বোঝায়</summary>
+        <dl>
+          <div><dt>HH / HL</dt><dd>আগের চেয়ে উঁচু চূড়া / উঁচু তল: ক্রেতারা নিয়ন্ত্রণে।</dd></div>
+          <div><dt>LH / LL</dt><dd>আগের চেয়ে নিচু চূড়া / নিচু তল: বিক্রেতারা নিয়ন্ত্রণে।</dd></div>
+          <div><dt>BOS</dt><dd>কাঠামো ভাঙা: দাম আগের চূড়া বা তলের ওপারে বন্ধ হয়েছে, প্রবণতা চলছে।</dd></div>
+          <div><dt>CHoCH</dt><dd>চরিত্র বদল: প্রবণতার বিপরীতে প্রথম ভাঙন, সম্ভাব্য মোড় ঘোরা।</dd></div>
+          <div><dt><i class="sw swliq"></i>স্টপের জায়গা</dt><dd>আগের চূড়া/তল, সমান চূড়া/তল, গতকাল ও গত সপ্তাহের উচ্চ-নিম্ন। এখানে অনেকের স্টপ লস থাকে, তাই বড় খেলোয়াড়রা প্রায়ই এগুলো ছুঁয়ে যায়।</dd></div>
+          <div><dt><i class="sw swfvg"></i>FVG (ফাঁক)</dt><dd>তিনটি ক্যান্ডেলের মাঝে দাম এত দ্রুত সরেছে যে একটি ফাঁকা জায়গা রয়ে গেছে।</dd></div>
+          <div><dt><i class="sw swdem"></i>চাহিদা / <i class="sw swsup"></i>সরবরাহ অঞ্চল</dt><dd>কাঠামো ভাঙার আগের শেষ বিপরীত ক্যান্ডেল (অর্ডার ব্লক): বড় অর্ডার যেখান থেকে শুরু হয়েছিল।</dd></div>
+          <div><dt>প্রিমিয়াম / ডিসকাউন্ট</dt><dd>সাম্প্রতিক চূড়া-তলের মাঝের রেখার উপরে দাম "দামি", নিচে "সস্তা"।</dd></div>
+          <div><dt><i class="sw sw80"></i>৪ ঘণ্টার পরিসর</dt><dd>আমাদের পরীক্ষিত মডেল: দাম ৮০% সম্ভাবনায় মাঝারি অংশে, ৯৫% সম্ভাবনায় হালকা অংশের ভেতরে থাকবে।</dd></div>
+        </dl>
+      </details>
+    </div>
+
+    <div class="card planner" id="planner">
+      <div class="card-head">
+        <h2>ট্রেড পরিকল্পনা <small>আপনার বাজেট ও দিক দিন, বাকিটা চার্ট থেকে</small></h2>
+      </div>
+      <div class="planner-grid">
+        <form class="plan-form" id="plan-form" autocomplete="off" novalidate>
+          <div class="seg" role="group" aria-label="দিক">
+            <button type="button" data-side="1" class="buy" aria-pressed="true">কিনব (Buy)</button>
+            <button type="button" data-side="-1" class="sell" aria-pressed="false">বেচব (Sell)</button>
+          </div>
+          <label>বাজেট (মার্কিন ডলার)
+            <input id="plan-budget" type="number" inputmode="decimal" min="10" step="10" value="1000">
+            <span class="field-error" id="budget-error"></span>
+          </label>
+          <label>প্রতি ট্রেডে ঝুঁকি
+            <select id="plan-risk">
+              <option value="0.005">০.৫% (সাবধানী)</option>
+              <option value="0.01" selected>১% (প্রস্তাবিত)</option>
+              <option value="0.02">২%</option>
+              <option value="0.03">৩% (আক্রমণাত্মক)</option>
+            </select>
+          </label>
+          <label>এন্ট্রি
+            <select id="plan-mode">
+              <option value="now" selected>এখনই, বাজার দামে</option>
+              <option value="pullback">ফিরে এলে, নিকটের অঞ্চলে (লিমিট)</option>
+            </select>
+          </label>
+          <label>লিভারেজ
+            <select id="plan-lev">
+              <option value="50">১:৫০</option>
+              <option value="100" selected>১:১০০</option>
+              <option value="200">১:২০০</option>
+              <option value="500">১:৫০০</option>
+            </select>
+          </label>
+        </form>
+        <div class="plan-out" id="plan-out" aria-live="polite"></div>
+      </div>
+      <p class="note">দিক আপনার সিদ্ধান্ত। ২৩ বছরের পরীক্ষায় কোনো চার্ট প্যাটার্ন বা সূচক দিক আগাম বলতে পারেনি, তাই আমরা দিক বেছে দিই না। আমরা দেখাই অভিজ্ঞ ট্রেডার কোথায় ঢোকেন, কোথায় স্টপ রাখেন, কোথায় লাভ তোলেন, আর কত লট নিলে একটি ভুলে অ্যাকাউন্ট শেষ হয় না।</p>
     </div>
 
     <div class="grid3">
       <div class="card">
-        <h2>সম্ভাব্য পরিসর</h2>
+        <h2>সম্ভাব্য পরিসর <small>আগামী ৪ ঘণ্টা</small></h2>
         <table class="kv" id="range-table"><tbody></tbody></table>
       </div>
       <div class="card">
@@ -66,8 +137,9 @@
         <p class="note">আগামী ৪ ঘণ্টায় প্রতিটি দিকে স্পর্শের সম্ভাবনা।</p>
       </div>
       <div class="card">
-        <h2>ট্রেড পরিকল্পনা সহায়িকা</h2>
-        <div id="helper" class="helper"></div>
+        <h2>পটভূমি <small>ফান্ডামেন্টাল</small></h2>
+        <ul class="macro" id="macro"></ul>
+        <p class="note" id="macro-note"></p>
       </div>
     </div>
 
@@ -101,6 +173,7 @@
     <div class="section-head"><h2>পদ্ধতি</h2></div>
     <div class="grid2">
       <div class="card"><h3>এটা কী দেখায়</h3><p>প্রতি ৪ ঘণ্টায় একটি মডেল হিসাব করে আগামী ৪ ঘণ্টায় দাম কোন পরিসরে থাকার সম্ভাবনা কতটা। মডেলটি সাম্প্রতিক ওঠানামা, দিনের কোন সময়, সোমবারের খোলা, সোনার অস্থিরতা সূচক (GVZ) এবং মার্কিন গুরুত্বপূর্ণ খবরের সময়সূচি দেখে শেখে, আর প্রতিটি ফলাফলের পর নিজেকে সংশোধন করে।</p></div>
+      <div class="card"><h3>চার্ট পড়া কীভাবে হয়</h3><p>কাঠামো, স্টপের জায়গা, ফাঁক ও অঞ্চল প্রতিটি সম্পূর্ণ ক্যান্ডেলের পর স্বয়ংক্রিয়ভাবে আঁকা হয়, শুধু তখন পর্যন্ত জানা তথ্য দিয়ে। একই কোড দিয়ে ২০০৩–২০২৩ সালের প্রতিটি ঘটনা মাপা হয়েছে, এবং প্রতিটি ফলাফল একটি নিয়ন্ত্রণের (কয়েন টস বা উল্টো দিকের সমান দূরত্বের স্তর) সাথে তুলনা করা হয়েছে। ফলাফল লুকানো হয়নি: বেশিরভাগ প্যাটার্ন ৫০% এর কাছাকাছি।</p></div>
       <div class="card"><h3>এটা কী দেখায় না</h3><p>দাম উঠবে না নামবে, তা এটি বলে না। ২০০৩ থেকে ২০২৬ পর্যন্ত আমরা ডজনখানেক জনপ্রিয় দিকনির্দেশক কৌশল কঠোরভাবে পরীক্ষা করেছি; কোনোটিই খরচ বাদ দিয়ে কয়েন টসের চেয়ে ভালো করেনি। তাই আমরা শুধু সেটাই দেখাই যা পরীক্ষায় টিকেছে: পরিসর।</p></div>
       <div class="card"><h3>কীভাবে পরীক্ষা করা হয়েছে</h3><p>নিয়ম আগে থেকে লিখে রাখা হয়েছিল। ২০০৩–২০১৮ সালের ডেটায় মডেল বাছাই, ২০১৯–২০২৩ সালে যাচাই, আর ২০২৪–২০২৬ সালে একবারের চূড়ান্ত পরীক্ষা। দুই ধাতুই উত্তীর্ণ হয়েছে: ৮০% পরিসর ৮০.০% (সোনা) ও ৭৯.৮% (রুপা) সময় সঠিক ছিল, খবরের সময়েও ~৮২%, যেখানে প্রচলিত মডেল ৬০% এর কাছাকাছি।</p></div>
       <div class="card"><h3>ডেটা ও দায়</h3><p>দামের ডেটা: Dukascopy (স্পট XAU/USD, XAG/USD)। লাইভ দাম Binance-এর গোল্ড/সিলভার চুক্তি থেকে, স্পট দামে সমন্বয় করে দেখানো হয়। এটি শিক্ষামূলক বিশ্লেষণ, বিনিয়োগ পরামর্শ নয়। ট্রেডিংয়ে মূলধন হারানোর ঝুঁকি আছে।</p></div>
@@ -114,6 +187,6 @@
 </footer>
 
 <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
-<script src="assets/app.js"></script>
+<script src="assets/app.js?v=6"></script>
 </body>
 </html>
