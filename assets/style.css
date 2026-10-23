@@ -45,6 +45,13 @@ nav { display: flex; gap: 16px; }
 nav a { color: var(--muted); text-decoration: none; font-weight: 500; font-size: 0.95rem; }
 nav a:hover { color: var(--ink); }
 .clock { margin-left: auto; color: var(--muted); font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+.prefs { display: flex; gap: 6px; align-items: center; }
+.pref { font: inherit; font-size: 0.85rem; font-weight: 600; color: var(--ink); background: var(--soft); border: 1px solid var(--line);
+  border-radius: 8px; padding: 4px 10px; cursor: pointer; min-height: 32px; display: inline-flex; align-items: center; gap: 6px; }
+.pref:hover { border-color: var(--muted); }
+.pref.icon { padding: 4px 7px; }
+#theme-toggle .sun, #theme-toggle[data-mode="dark"] .moon { display: none; }
+#theme-toggle[data-mode="dark"] .sun { display: block; }
 
 /* Market */
 .market { display: grid; gap: 16px; padding-block: 20px 8px; }
@@ -204,4 +211,13 @@ table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nu
   .hero, .grid3, .grid2 { grid-template-columns: minmax(0, 1fr); }
   .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .clock { width: 100%; margin-left: 0; order: 3; padding-bottom: 6px; }
+  .prefs { margin-left: auto; }
+}
+
+/* Phone: brand and the two buttons on the first row; menu and clock share the second. */
+@media (max-width: 640px) {
+  .topbar-inner { gap: 4px 14px; padding-block: 6px; }
+  .prefs { order: 2; margin-left: auto; }
+  nav { order: 3; gap: 12px; }
+  .clock { order: 4; width: auto; margin-left: auto; padding-bottom: 0; }
 }
